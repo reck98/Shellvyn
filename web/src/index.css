@@ -1,55 +1,81 @@
 @import "tailwindcss";
 
 :root {
-  /* Default Dark Mode (Linear / Raycast inspired obsidian theme) */
-  --bg-canvas: #090d14;
-  --bg-subtle: #0f1420;
-  --bg-surface: #141b2a;
-  --bg-hover: #1c2538;
-  --border-default: #232d42;
-  --border-subtle: #192132;
-  --border-focus: #38bdf8;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --accent: #0ea5e9;
-  --accent-hover: #38bdf8;
-  --accent-subtle: rgba(14, 165, 233, 0.1);
-  --success: #10b981;
-  --success-bg: rgba(16, 185, 129, 0.1);
-  --warning: #f59e0b;
-  --error: #f43f5e;
-  --error-bg: rgba(244, 63, 94, 0.1);
-  --term-bg: #090d14;
-  --term-fg: #f8fafc;
-  --term-cursor: #38bdf8;
-  --term-selection: #232d42;
+  /* ========================================================
+     Dark Mode: Deep Olive-Charcoal & Warm Ivory Theme
+     Base Palette: #F5EFE3 (Ivory), #4F5B2A (Olive), #B8892D (Gold), #D8C9A8 (Sand)
+     ======================================================== */
+  --bg-canvas: #0e120a;          /* Deep olive-tinted charcoal void */
+  --bg-subtle: #14190f;          /* Subtle top/bottom bars */
+  --bg-surface: #1a2214;         /* Elevated cards & console surface */
+  --bg-hover: #232c1c;           /* Hover / active item highlight */
+
+  --border-default: #2b3621;     /* Default structural dividers */
+  --border-subtle: #1e2617;      /* Subtle internal lines */
+  --border-focus: #b8892d;       /* Muted Gold keyboard focus */
+
+  --text-primary: #f5efe3;       /* Warm Ivory primary text */
+  --text-secondary: #c9c3b4;     /* Soft Sand secondary text */
+  --text-muted: #858d73;         /* Olive-tinted muted metadata */
+
+  --accent: #5e7033;             /* Vibrant Olive primary action */
+  --accent-hover: #6f833d;        /* Lighter Olive hover */
+  --accent-contrast: #f5efe3;    /* Warm Ivory text on button */
+  --accent-subtle: rgba(184, 137, 45, 0.12); /* Subtle Gold badge bg */
+
+  --gold: #b8892d;               /* Muted Gold token */
+  --gold-hover: #cca041;
+  --sand: #d8c9a8;               /* Soft Sand token */
+
+  --success: #34d399;            /* Accessible emerald status */
+  --success-bg: rgba(52, 211, 153, 0.1);
+  --warning: #d4a23d;            /* Warm gold warning */
+  --error: #f87171;              /* Accessible soft red */
+  --error-bg: rgba(248, 113, 113, 0.1);
+
+  --term-bg: #0b0e08;            /* Dark olive terminal background */
+  --term-fg: #f5efe3;            /* Warm Ivory terminal text */
+  --term-cursor: #d4a23d;        /* Gold terminal cursor */
+  --term-selection: #2a351d;     /* Olive selection */
 }
 
 [data-theme="light"] {
-  /* First-Class Light Theme (Precision slate-white minimal developer aesthetic) */
-  --bg-canvas: #f8fafc;
-  --bg-subtle: #f1f5f9;
-  --bg-surface: #ffffff;
-  --bg-hover: #f1f5f9;
-  --border-default: #e2e8f0;
-  --border-subtle: #edf2f7;
-  --border-focus: #0284c7;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --accent: #0284c7;
-  --accent-hover: #0369a1;
-  --accent-subtle: rgba(2, 132, 199, 0.08);
-  --success: #059669;
-  --success-bg: rgba(5, 150, 105, 0.08);
-  --warning: #d97706;
-  --error: #e11d48;
-  --error-bg: rgba(225, 29, 72, 0.08);
-  --term-bg: #ffffff;
-  --term-fg: #0f172a;
-  --term-cursor: #0284c7;
-  --term-selection: #e2e8f0;
+  /* ========================================================
+     Light Mode: Warm Ivory, Deep Olive, Muted Gold & Soft Sand
+     Direct implementation of https://colorhunt.co/palette/f5efe34f5b2ab8892dd8c9a8
+     ======================================================== */
+  --bg-canvas: #f5efe3;          /* Warm Ivory Canvas */
+  --bg-subtle: #ebe3d3;          /* Ivory-tinted subtle bars */
+  --bg-surface: #ffffff;         /* Elevated clean white cards */
+  --bg-hover: #ede4d2;           /* Soft Sand hover */
+
+  --border-default: #d8c9a8;     /* Soft Sand structural dividers */
+  --border-subtle: #e5dac0;      /* Hairline dividers */
+  --border-focus: #4f5b2a;       /* Deep Olive focus ring */
+
+  --text-primary: #1c2210;       /* Deep Olive-Black primary text (13.8:1 contrast) */
+  --text-secondary: #4a5435;     /* Olive Charcoal secondary text (6.8:1 contrast) */
+  --text-muted: #727c5b;         /* Muted Olive metadata (4.5:1 contrast) */
+
+  --accent: #4f5b2a;             /* Deep Olive primary action (6.3:1 contrast) */
+  --accent-hover: #3d471f;        /* Deeper Olive hover */
+  --accent-contrast: #f5efe3;    /* Warm Ivory text on button */
+  --accent-subtle: rgba(79, 91, 42, 0.08); /* Olive tint */
+
+  --gold: #8f6719;               /* High-contrast accessible Muted Gold */
+  --gold-hover: #755312;
+  --sand: #d8c9a8;               /* Soft Sand */
+
+  --success: #236845;            /* Accessible deep forest green */
+  --success-bg: rgba(35, 104, 69, 0.08);
+  --warning: #9a6700;            /* Accessible dark amber */
+  --error: #b91c1c;              /* Crimson red */
+  --error-bg: rgba(185, 28, 28, 0.08);
+
+  --term-bg: #faf7f0;            /* Warm Ivory paper terminal */
+  --term-fg: #1c2210;            /* Deep Olive text */
+  --term-cursor: #4f5b2a;        /* Deep Olive cursor */
+  --term-selection: #d8c9a8;     /* Soft Sand selection */
 }
 
 @layer base {

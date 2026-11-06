@@ -440,7 +440,7 @@ export const App: React.FC = () => {
                   <button
                     type="submit"
                     disabled={!isValidPairingCode(pairingCode)}
-                    className="w-full h-10 bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-[var(--bg-hover)] disabled:text-[var(--text-muted)] text-white text-xs font-medium rounded transition flex items-center justify-center space-x-1.5 cursor-pointer disabled:cursor-not-allowed"
+                    className="w-full h-10 bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-[var(--bg-hover)] disabled:text-[var(--text-muted)] text-[var(--accent-contrast)] text-xs font-medium rounded transition flex items-center justify-center space-x-1.5 cursor-pointer disabled:cursor-not-allowed"
                   >
                     <span>Connect to Host</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -588,7 +588,7 @@ export const App: React.FC = () => {
                 {pairingCode && (
                   <button
                     onClick={() => handleConnectCode()}
-                    className="flex-1 h-9 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-medium rounded transition cursor-pointer flex items-center justify-center space-x-1"
+                    className="flex-1 h-9 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-contrast)] text-xs font-medium rounded transition cursor-pointer flex items-center justify-center space-x-1"
                   >
                     <RotateCcw className="w-3 h-3" />
                     <span>Reconnect</span>
