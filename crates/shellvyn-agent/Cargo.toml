@@ -1,0 +1,22 @@
+[package]
+name = "shellvyn-agent"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Native host agent for Shellvyn"
+
+[dependencies]
+shellvyn-core.workspace = true
+shellvyn-pty.workspace = true
+tokio.workspace = true
+tokio-tungstenite.workspace = true
+futures-util.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+clap.workspace = true
+thiserror.workspace = true
+bytes.workspace = true
+rand.workspace = true

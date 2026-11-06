@@ -1,0 +1,21 @@
+[package]
+name = "shellvyn-pty"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Cross-platform pseudo-terminal (PTY) abstraction for Shellvyn (ConPTY on Windows, POSIX openpty on Unix)"
+
+[dependencies]
+shellvyn-core.workspace = true
+tokio.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+async-trait.workspace = true
+bytes.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+windows-sys.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+nix.workspace = true
