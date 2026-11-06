@@ -65,6 +65,7 @@
 - [x] Connect web client directly to local agent over loopback WebSocket.
 - [x] Verify full keyboard input, ANSI true-color output, and dynamic window resize.
 - [x] Automated end-to-end integration test (`loopback_test.rs`).
+- [x] Taste Design Overhaul: Redesigned web client with minimal, high-density layout, first-class Light/Dark modes, session history, and zero AI-generated visual clutter.
 
 ### M3 — Pairing & Signaling Service
 - [x] Implement Crockford Base32 8-char pairing generator with 5-minute TTL.

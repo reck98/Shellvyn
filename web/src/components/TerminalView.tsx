@@ -4,11 +4,62 @@ import { FitAddon } from '@xterm/addon-fit';
 import { WebglAddon } from '@xterm/addon-webgl';
 import '@xterm/xterm/css/xterm.css';
 
+export const DARK_TERMINAL_THEME = {
+  background: '#090d14',
+  foreground: '#f1f5f9',
+  cursor: '#38bdf8',
+  cursorAccent: '#090d14',
+  selectionBackground: '#223048',
+  selectionForeground: '#ffffff',
+  black: '#090d14',
+  red: '#f87171',
+  green: '#34d399',
+  yellow: '#fbbf24',
+  blue: '#60a5fa',
+  magenta: '#c084fc',
+  cyan: '#38bdf8',
+  white: '#f1f5f9',
+  brightBlack: '#475569',
+  brightRed: '#ef4444',
+  brightGreen: '#10b981',
+  brightYellow: '#f59e0b',
+  brightBlue: '#3b82f6',
+  brightMagenta: '#a855f7',
+  brightCyan: '#0ea5e9',
+  brightWhite: '#ffffff',
+};
+
+export const LIGHT_TERMINAL_THEME = {
+  background: '#ffffff',
+  foreground: '#0f172a',
+  cursor: '#0284c7',
+  cursorAccent: '#ffffff',
+  selectionBackground: '#e2e8f0',
+  selectionForeground: '#0f172a',
+  black: '#0f172a',
+  red: '#dc2626',
+  green: '#16a34a',
+  yellow: '#ca8a04',
+  blue: '#2563eb',
+  magenta: '#9333ea',
+  cyan: '#0891b2',
+  white: '#f8fafc',
+  brightBlack: '#64748b',
+  brightRed: '#ef4444',
+  brightGreen: '#22c55e',
+  brightYellow: '#eab308',
+  brightBlue: '#3b82f6',
+  brightMagenta: '#a855f7',
+  brightCyan: '#06b6d4',
+  brightWhite: '#0f172a',
+};
+
 interface TerminalViewProps {
   onInput?: (data: string) => void;
   onResize?: (cols: number, rows: number) => void;
   readOnly?: boolean;
   terminalRef?: React.MutableRefObject<Terminal | null>;
+  theme?: 'light' | 'dark';
 }
 
 export const TerminalView: React.FC<TerminalViewProps> = ({
@@ -16,6 +67,7 @@ export const TerminalView: React.FC<TerminalViewProps> = ({
   onResize,
   readOnly = false,
   terminalRef,
+  theme = 'dark',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
@@ -23,37 +75,18 @@ export const TerminalView: React.FC<TerminalViewProps> = ({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const activeTheme = theme === 'light' ? LIGHT_TERMINAL_THEME : DARK_TERMINAL_THEME;
+
     // 1. Initialize xterm.js instance
     const term = new Terminal({
       cursorBlink: true,
       cursorStyle: 'bar',
-      fontSize: 14,
-      fontFamily: `'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace`,
-      theme: {
-        background: '#020617', // slate-950
-        foreground: '#f8fafc', // slate-50
-        cursor: '#38bdf8', // sky-400
-        cursorAccent: '#020617',
-        selectionBackground: '#334155',
-        selectionForeground: '#ffffff',
-        black: '#0f172a',
-        red: '#ef4444',
-        green: '#22c55e',
-        yellow: '#eab308',
-        blue: '#3b82f6',
-        magenta: '#a855f7',
-        cyan: '#06b6d4',
-        white: '#f1f5f9',
-        brightBlack: '#475569',
-        brightRed: '#f87171',
-        brightGreen: '#4ade80',
-        brightYellow: '#facc15',
-        brightBlue: '#60a5fa',
-        brightMagenta: '#c084fc',
-        brightCyan: '#22d3ee',
-        brightWhite: '#ffffff',
-      },
-      allowTransparency: true,
+      fontSize: 13.5,
+      fontFamily: `'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Consolas, monospace`,
+      lineHeight: 1.35,
+      letterSpacing: 0,
+      theme: activeTheme,
+      allowTransparency: false,
       scrollback: 10000,
       convertEol: true,
     });
@@ -77,13 +110,14 @@ export const TerminalView: React.FC<TerminalViewProps> = ({
       });
       term.loadAddon(webglAddon);
     } catch {
-      // Fallback to standard canvas/DOM rendering
+      // Fallback to standard canvas rendering
     }
 
-    // Initial fit
+    // Initial fit & focus
     requestAnimationFrame(() => {
       try {
         fitAddon.fit();
+        term.focus();
         if (onResize) {
           onResize(term.cols, term.rows);
         }
@@ -125,9 +159,17 @@ export const TerminalView: React.FC<TerminalViewProps> = ({
     };
   }, [readOnly]);
 
+  // Dynamically update theme if it toggles during an active session
+  useEffect(() => {
+    if (terminalRef?.current) {
+      terminalRef.current.options.theme =
+        theme === 'light' ? LIGHT_TERMINAL_THEME : DARK_TERMINAL_THEME;
+    }
+  }, [theme, terminalRef]);
+
   return (
-    <div className="relative w-full h-full bg-slate-950 overflow-hidden flex flex-col">
-      <div ref={containerRef} className="w-full h-full" />
+    <div className="relative w-full h-full overflow-hidden flex flex-col bg-[var(--term-bg)]">
+      <div ref={containerRef} className="w-full h-full p-2" />
     </div>
   );
 };

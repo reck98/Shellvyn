@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased] - 2026-11-07
 
 ### Added
+- Redesigned Web Client Interface (Taste Design Overhaul):
+  - Completely eliminated AI-generated visual clutter, excessive gradients, glowing cards, and arbitrary animations.
+  - Built a refined, minimal, high-density developer workstation interface inspired by Linear, Raycast, and Warp.
+  - Implemented first-class Light and Dark visual modes with instant `@xterm/xterm` color palette switching and `localStorage` persistence.
+  - Refactored pairing code console with character normalization, instant input validation, and local session history (last 3 sessions).
+  - Streamlined active terminal toolbar with session geometry indicators, link sharing, and buffer clearing.
 - Completed reverse-engineering investigation of reference product (Skyping) using REA.
 - Authored 5 detailed investigation documents:
   - `investigation/PRODUCT_ANALYSIS.md`

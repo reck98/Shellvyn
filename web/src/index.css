@@ -1,40 +1,111 @@
 @import "tailwindcss";
 
+:root {
+  /* Default Dark Mode (Linear / Raycast inspired obsidian theme) */
+  --bg-canvas: #090d14;
+  --bg-subtle: #0f1420;
+  --bg-surface: #141b2a;
+  --bg-hover: #1c2538;
+  --border-default: #232d42;
+  --border-subtle: #192132;
+  --border-focus: #38bdf8;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #0ea5e9;
+  --accent-hover: #38bdf8;
+  --accent-subtle: rgba(14, 165, 233, 0.1);
+  --success: #10b981;
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --warning: #f59e0b;
+  --error: #f43f5e;
+  --error-bg: rgba(244, 63, 94, 0.1);
+  --term-bg: #090d14;
+  --term-fg: #f8fafc;
+  --term-cursor: #38bdf8;
+  --term-selection: #232d42;
+}
+
+[data-theme="light"] {
+  /* First-Class Light Theme (Precision slate-white minimal developer aesthetic) */
+  --bg-canvas: #f8fafc;
+  --bg-subtle: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-hover: #f1f5f9;
+  --border-default: #e2e8f0;
+  --border-subtle: #edf2f7;
+  --border-focus: #0284c7;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent: #0284c7;
+  --accent-hover: #0369a1;
+  --accent-subtle: rgba(2, 132, 199, 0.08);
+  --success: #059669;
+  --success-bg: rgba(5, 150, 105, 0.08);
+  --warning: #d97706;
+  --error: #e11d48;
+  --error-bg: rgba(225, 29, 72, 0.08);
+  --term-bg: #ffffff;
+  --term-fg: #0f172a;
+  --term-cursor: #0284c7;
+  --term-selection: #e2e8f0;
+}
+
 @layer base {
+  * {
+    box-sizing: border-box;
+  }
+
   body {
-    @apply bg-slate-950 text-slate-100 font-sans antialiased overflow-hidden select-none;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
     margin: 0;
     padding: 0;
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
 }
 
-/* xterm.js theme overrides and styling */
+/* xterm.js theme overrides and integration */
 .xterm {
   height: 100%;
-  padding: 8px;
+  padding: 6px;
 }
 
 .xterm .xterm-viewport {
   background-color: transparent !important;
 }
 
-/* Custom scrollbar */
+/* Minimal Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(51, 65, 85, 0.8);
-  border-radius: 3px;
+  background: var(--border-default);
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(71, 85, 105, 1);
+  background: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
