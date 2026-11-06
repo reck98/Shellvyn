@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%" fill="none">
+  <style>
+    .shellvyn-stroke { stroke: #4F5B2A; }
+    .shellvyn-gold { fill: #B8892D; }
+    @media (prefers-color-scheme: dark) {
+      .shellvyn-stroke { stroke: #F5EFE3; }
+      .shellvyn-gold { fill: #D4A23D; }
+    }
+  </style>
+  <path class="shellvyn-stroke" d="M 35 12 H 19 L 12 19 V 21 L 17.5 26.5 H 23" 
+        stroke-width="4.25" stroke-linecap="round" stroke-linejoin="round" />
+  <path class="shellvyn-stroke" d="M 13 36 H 29 L 36 29 V 27 L 30.5 21.5 H 25" 
+        stroke-width="4.25" stroke-linecap="round" stroke-linejoin="round" />
+  <rect class="shellvyn-gold" x="21.5" y="21.5" width="5" height="5" rx="1" />
+</svg>

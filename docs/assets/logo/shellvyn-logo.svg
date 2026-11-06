@@ -1,39 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 160" width="100%" height="100%" fill="none">
-  <defs>
-    <linearGradient id="grad-accent" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38bdf8" />
-      <stop offset="50%" stop-color="#6366f1" />
-      <stop offset="100%" stop-color="#a855f7" />
-    </linearGradient>
-    <linearGradient id="grad-card" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#1e293b" />
-      <stop offset="100%" stop-color="#0f172a" />
-    </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="8" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
-  </defs>
-
-  <!-- Icon Container -->
-  <rect x="20" y="20" width="120" height="120" rx="28" fill="url(#grad-card)" stroke="#334155" stroke-width="2" />
-  
-  <!-- Terminal Chevron and Pulse Line -->
-  <path d="M 46 54 L 72 80 L 46 106" stroke="url(#grad-accent)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
-  <line x1="84" y1="106" x2="114" y2="106" stroke="#38bdf8" stroke-width="8" stroke-linecap="round" />
-  
-  <!-- Network Dot Indicator -->
-  <circle cx="106" cy="54" r="6" fill="#38bdf8" filter="url(#glow)" />
-  <circle cx="106" cy="54" r="4" fill="#ffffff" />
-
-  <!-- Wordmark -->
-  <text x="170" y="94" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', sans-serif" font-size="54" font-weight="800" letter-spacing="-1" fill="#f8fafc">
-    Shell<tspan fill="url(#grad-accent)">vyn</tspan>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 56" width="320" height="56" fill="none">
+  <style>
+    .shellvyn-stroke { stroke: #4F5B2A; }
+    .shellvyn-text { fill: #4F5B2A; }
+    .shellvyn-gold { fill: #B8892D; }
+    .shellvyn-tag { fill: #727c5b; }
+    @media (prefers-color-scheme: dark) {
+      .shellvyn-stroke { stroke: #F5EFE3; }
+      .shellvyn-text { fill: #F5EFE3; }
+      .shellvyn-gold { fill: #D4A23D; }
+      .shellvyn-tag { fill: #858d73; }
+    }
+  </style>
+  <g transform="translate(6, 7)">
+    <svg viewBox="0 0 48 48" width="42" height="42" fill="none">
+      <path class="shellvyn-stroke" d="M 35 12 H 19 L 12 19 V 21 L 17.5 26.5 H 23" 
+            stroke-width="4.25" stroke-linecap="round" stroke-linejoin="round" />
+      <path class="shellvyn-stroke" d="M 13 36 H 29 L 36 29 V 27 L 30.5 21.5 H 25" 
+            stroke-width="4.25" stroke-linecap="round" stroke-linejoin="round" />
+      <rect class="shellvyn-gold" x="21.5" y="21.5" width="5" height="5" rx="1" />
+    </svg>
+  </g>
+  <text class="shellvyn-text" x="60" y="33" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif" 
+        font-size="24" font-weight="700" letter-spacing="-0.4">
+    Shell<tspan font-weight="500">vyn</tspan>
   </text>
-
-  <!-- Tagline badge -->
-  <rect x="172" y="110" width="220" height="24" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1" />
-  <text x="184" y="126" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', sans-serif" font-size="12" font-weight="600" letter-spacing="1.5" fill="#94a3b8">
+  <text class="shellvyn-tag" x="61" y="46" font-family="'JetBrains Mono', 'Fira Code', monospace" 
+        font-size="8.5" font-weight="600" letter-spacing="1.5">
     ZERO-KNOWLEDGE TERMINAL
   </text>
 </svg>

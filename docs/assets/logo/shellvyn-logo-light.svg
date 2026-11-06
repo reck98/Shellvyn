@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 56" width="320" height="56" fill="none">
+  <!-- Shellvyn Primary Logo (Light Mode) -->
+  <g transform="translate(6, 7)">
+    <svg viewBox="0 0 48 48" width="42" height="42" fill="none">
+      <path d="M 35 12 H 19 L 12 19 V 21 L 17.5 26.5 H 23" 
+            stroke="#4F5B2A" stroke-width="4.25" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M 13 36 H 29 L 36 29 V 27 L 30.5 21.5 H 25" 
+            stroke="#4F5B2A" stroke-width="4.25" stroke-linecap="round" stroke-linejoin="round" />
+      <rect x="21.5" y="21.5" width="5" height="5" rx="1" fill="#B8892D" />
+    </svg>
+  </g>
+  <text x="60" y="33" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif" 
+        font-size="24" font-weight="700" letter-spacing="-0.4" fill="#4F5B2A">
+    Shell<tspan font-weight="500">vyn</tspan>
+  </text>
+  <text x="61" y="46" font-family="'JetBrains Mono', 'Fira Code', monospace" 
+        font-size="8.5" font-weight="600" letter-spacing="1.5" fill="#727c5b">
+    ZERO-KNOWLEDGE TERMINAL
+  </text>
+</svg>

@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="docs/assets/logo/shellvyn-logo.svg" alt="Shellvyn Logo" width="520" />
+  <img src="docs/assets/logo/shellvyn-logo.svg" alt="Shellvyn Logo" width="460" />
 
   <p><strong>Your terminal. Anywhere.</strong></p>
 
@@ -10,18 +10,20 @@
   </p>
 
   <p>
-    <a href="https://github.com/reck98/Shellvyn/releases"><img src="https://img.shields.io/badge/release-v0.1.0-blue?style=flat-square" alt="Latest Release" /></a>
-    <a href="LICENSE-MIT"><img src="https://img.shields.io/badge/license-MIT%20%7C%20Apache--2.0-blue?style=flat-square" alt="License" /></a>
-    <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/rust-1.80%2B-orange?style=flat-square&logo=rust" alt="Rust Version" /></a>
-    <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey?style=flat-square&logo=linux" alt="Supported Platforms" />
-    <img src="https://img.shields.io/badge/crypto-ChaCha20--Poly1305%20%2B%20HKDF-blueviolet?style=flat-square" alt="Cryptography" />
-    <a href="TESTING_STATUS.md"><img src="https://img.shields.io/badge/tests-28%2F28%20passing-brightgreen?style=flat-square" alt="Test Status" /></a>
+    <a href="https://github.com/reck98/Shellvyn/releases"><img src="https://img.shields.io/badge/release-v0.1.0-4F5B2A?style=flat-square" alt="Latest Release" /></a>
+    <a href="LICENSE-MIT"><img src="https://img.shields.io/badge/license-MIT%20%7C%20Apache--2.0-4F5B2A?style=flat-square" alt="License" /></a>
+    <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/rust-1.80%2B-B8892D?style=flat-square&logo=rust" alt="Rust Version" /></a>
+    <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux-4F5B2A?style=flat-square&logo=linux" alt="Supported Platforms" />
+    <img src="https://img.shields.io/badge/crypto-ChaCha20--Poly1305%20%2B%20HKDF-4F5B2A?style=flat-square" alt="Cryptography" />
+    <a href="TESTING_STATUS.md"><img src="https://img.shields.io/badge/tests-28%2F28%20passing-34d399?style=flat-square" alt="Test Status" /></a>
     <a href="https://github.com/reck98/Shellvyn/stargazers"><img src="https://img.shields.io/github/stars/reck98/Shellvyn?style=flat-square" alt="GitHub Stars" /></a>
   </p>
 
   <br />
 
-  <img src="docs/assets/screenshots/shellvyn-dashboard.svg" alt="Shellvyn Dashboard Preview" width="100%" />
+  <img src="docs/assets/screenshots/shellvyn-dashboard.png" alt="Shellvyn Live Terminal Sharing Dashboard" width="100%" />
+
+  <p align="center"><em>Live Shellvyn terminal sharing session in browser with Zero-Knowledge ChaCha20-Poly1305 encryption and native ConPTY streaming.</em></p>
 
 </div>
 
@@ -368,8 +370,13 @@ Status: Session registered. Waiting for incoming viewer connection...
 1. Start the web frontend development server (`cd web && npm run dev`) or host the static build in `web/dist/`.
 2. Open `http://localhost:5173` in any modern web browser.
 3. Enter the 8-character pairing code (e.g., `KV7M-9X2P`).
-4. Click **Connect to Remote Session**.
+4. Click **Connect to Host**.
 5. Once connected, your browser terminal streams encrypted keystrokes and ANSI output in real time!
+
+<p align="center">
+  <img src="docs/assets/screenshots/shellvyn-lobby.png" alt="Shellvyn Web Client Lobby" width="90%" />
+</p>
+<p align="center"><em>Shellvyn Web Client Lobby with ephemeral pairing code input and local PTY test bridge.</em></p>
 
 ---
 

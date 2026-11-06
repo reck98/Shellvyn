@@ -298,9 +298,27 @@ export const App: React.FC = () => {
       <header className="h-11 border-b border-[var(--border-default)] bg-[var(--bg-subtle)] px-4 flex items-center justify-between shrink-0 z-20">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
-            <span className="font-mono text-sm font-semibold tracking-tight flex items-center text-[var(--text-primary)]">
-              <span className="text-[var(--accent)] mr-1">&gt;_</span>
-              <span>Shellvyn</span>
+            <svg viewBox="0 0 48 48" className="w-5 h-5 shrink-0" fill="none" aria-hidden="true">
+              <path
+                d="M 35 12 H 19 L 12 19 V 21 L 17.5 26.5 H 23"
+                stroke="currentColor"
+                strokeWidth="4.25"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-[var(--text-primary)]"
+              />
+              <path
+                d="M 13 36 H 29 L 36 29 V 27 L 30.5 21.5 H 25"
+                stroke="currentColor"
+                strokeWidth="4.25"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-[var(--text-primary)]"
+              />
+              <rect x="21.5" y="21.5" width="5" height="5" rx="1" fill="var(--gold)" />
+            </svg>
+            <span className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
+              Shell<span className="font-medium text-[var(--text-secondary)]">vyn</span>
             </span>
             <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--text-muted)]">
               v0.1.0
