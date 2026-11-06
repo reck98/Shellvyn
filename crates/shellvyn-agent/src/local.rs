@@ -32,7 +32,7 @@ pub async fn run_local_server(port: u16) -> Result<(), Box<dyn std::error::Error
         .route("/ws", get(ws_handler))
         .route("/", get(index_handler))
         .route("/assets/{*path}", get(assets_handler))
-        .fallback(index_handler)
+        .fallback(static_file_or_index_handler)
         .with_state(state);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
@@ -82,21 +82,50 @@ async fn index_handler(State(state): State<Arc<LocalServerState>>) -> Response {
 </html>"#).into_response()
 }
 
+fn get_mime_type(path: &Path) -> &'static str {
+    match path.extension().and_then(|ext| ext.to_str()) {
+        Some("js") | Some("mjs") => "application/javascript",
+        Some("css") => "text/css",
+        Some("svg") => "image/svg+xml",
+        Some("png") => "image/png",
+        Some("ico") => "image/x-icon",
+        Some("webp") => "image/webp",
+        Some("json") => "application/json",
+        Some("html") => "text/html; charset=utf-8",
+        _ => "application/octet-stream",
+    }
+}
+
+async fn static_file_or_index_handler(
+    State(state): State<Arc<LocalServerState>>,
+    uri: axum::http::Uri,
+) -> Response {
+    let raw_path = uri.path().trim_start_matches('/');
+    if !raw_path.is_empty() {
+        let file_path = state.static_dir.join(raw_path);
+        if file_path.is_file() {
+            if let Ok(content) = fs::read(&file_path).await {
+                let mime = get_mime_type(&file_path);
+                return (
+                    [
+                        ("content-type", mime),
+                        ("cache-control", "no-cache"),
+                    ],
+                    content,
+                ).into_response();
+            }
+        }
+    }
+    index_handler(State(state)).await
+}
+
 async fn assets_handler(
     State(state): State<Arc<LocalServerState>>,
     axum::extract::Path(path): axum::extract::Path<String>,
 ) -> Response {
     let file_path = state.static_dir.join("assets").join(&path);
     if let Ok(content) = fs::read(&file_path).await {
-        let mime = if path.ends_with(".js") {
-            "application/javascript"
-        } else if path.ends_with(".css") {
-            "text/css"
-        } else if path.ends_with(".svg") {
-            "image/svg+xml"
-        } else {
-            "application/octet-stream"
-        };
+        let mime = get_mime_type(&file_path);
 
         return (
             [("content-type", mime)],
