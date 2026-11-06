@@ -127,6 +127,37 @@
   background: var(--text-muted);
 }
 
+/* Terminal & App Frame Styling */
+.app-frame {
+  background: var(--term-bg);
+  border: 1px solid var(--border-default);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.25);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Consolas, monospace;
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  background-color: var(--gold);
+  animation: cursor-blink 1.2s steps(2, start) infinite;
+  vertical-align: middle;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.95); }
+}
+
+.pulse-active {
+  animation: pulse-subtle 2.5s infinite ease-in-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
