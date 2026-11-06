@@ -30,6 +30,8 @@ import {
   KeyRound,
   RotateCcw,
   Trash2,
+  Download,
+  ExternalLink,
 } from 'lucide-react';
 
 type ConnectionState = 'idle' | 'awaiting_approval' | 'connected' | 'disconnected';
@@ -58,6 +60,16 @@ export const App: React.FC = () => {
       return [];
     }
   });
+
+  const [activeConsoleTab, setActiveConsoleTab] = useState<'join' | 'host'>('join');
+  const [installOs, setInstallOs] = useState<'windows' | 'linux' | 'cargo'>('windows');
+  const [copiedSnippet, setCopiedSnippet] = useState<string | null>(null);
+
+  const copySnippet = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedSnippet(id);
+    setTimeout(() => setCopiedSnippet(null), 2000);
+  };
 
   const socketRef = useRef<WebSocket | null>(null);
   const terminalRef = useRef<Terminal | null>(null);
@@ -440,93 +452,274 @@ export const App: React.FC = () => {
               {/* Product Header */}
               <div className="space-y-1.5 text-center">
                 <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
-                  Connect to Terminal
+                  {activeConsoleTab === 'join' ? 'Connect to Terminal' : 'Share Your Terminal'}
                 </h2>
                 <p className="text-xs text-[var(--text-secondary)] max-w-xs mx-auto leading-relaxed">
-                  Enter an 8-character pairing code to establish a zero-knowledge encrypted terminal session.
+                  {activeConsoleTab === 'join'
+                    ? 'Enter an 8-character pairing code to establish a zero-knowledge encrypted terminal session.'
+                    : 'Run the lightweight native agent on your host machine to securely stream your local shell.'}
                 </p>
               </div>
 
               {/* Connection Console Surface */}
               <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-lg p-5 shadow-sm space-y-5">
-                <form onSubmit={handleConnectCode} className="space-y-4">
-                  <div>
-                    <label className="block text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)] mb-2 font-mono">
-                      Pairing Code
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={pairingCode}
-                        onChange={(e) => setPairingCode(normalizePairingCode(e.target.value))}
-                        placeholder="XXXX-XXXX"
-                        maxLength={9}
-                        autoFocus
-                        className="w-full h-12 bg-[var(--bg-canvas)] border border-[var(--border-default)] focus:border-[var(--border-focus)] rounded text-center text-xl font-mono tracking-widest text-[var(--text-primary)] focus:outline-none transition placeholder:text-[var(--text-muted)] uppercase"
-                      />
-                      {pairingCode && (
-                        <button
-                          type="button"
-                          onClick={() => setPairingCode('')}
-                          className="absolute right-3 top-3.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
+                {/* Mode Switcher */}
+                <div className="flex bg-[var(--bg-canvas)] p-1 rounded border border-[var(--border-default)]">
                   <button
-                    type="submit"
-                    disabled={!isValidPairingCode(pairingCode)}
-                    className="w-full h-10 bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-[var(--bg-hover)] disabled:text-[var(--text-muted)] text-[var(--accent-contrast)] text-xs font-medium rounded transition flex items-center justify-center space-x-1.5 cursor-pointer disabled:cursor-not-allowed"
+                    type="button"
+                    onClick={() => setActiveConsoleTab('join')}
+                    className={`flex-1 py-1.5 text-xs font-medium rounded transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+                      activeConsoleTab === 'join'
+                        ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs font-semibold'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+                    }`}
                   >
-                    <span>Connect to Host</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <Radio className="w-3.5 h-3.5" />
+                    <span>Join Session</span>
                   </button>
-                </form>
+                  <button
+                    type="button"
+                    onClick={() => setActiveConsoleTab('host')}
+                    className={`flex-1 py-1.5 text-xs font-medium rounded transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+                      activeConsoleTab === 'host'
+                        ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs font-semibold'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+                    }`}
+                  >
+                    <TerminalIcon className="w-3.5 h-3.5" />
+                    <span>Host a Terminal</span>
+                  </button>
+                </div>
 
-                {/* Recent Codes */}
-                {recentCodes.length > 0 && (
-                  <div className="pt-3 border-t border-[var(--border-subtle)]">
-                    <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)] mb-2 font-mono">
-                      <span>Recent Sessions</span>
+                {activeConsoleTab === 'join' ? (
+                  <>
+                    <form onSubmit={handleConnectCode} className="space-y-4">
+                      <div>
+                        <label className="block text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)] mb-2 font-mono">
+                          Pairing Code
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={pairingCode}
+                            onChange={(e) => setPairingCode(normalizePairingCode(e.target.value))}
+                            placeholder="XXXX-XXXX"
+                            maxLength={9}
+                            autoFocus
+                            className="w-full h-12 bg-[var(--bg-canvas)] border border-[var(--border-default)] focus:border-[var(--border-focus)] rounded text-center text-xl font-mono tracking-widest text-[var(--text-primary)] focus:outline-none transition placeholder:text-[var(--text-muted)] uppercase"
+                          />
+                          {pairingCode && (
+                            <button
+                              type="button"
+                              onClick={() => setPairingCode('')}
+                              className="absolute right-3 top-3.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
                       <button
-                        onClick={clearRecentCodes}
-                        className="hover:text-[var(--text-secondary)] transition cursor-pointer flex items-center space-x-1 text-[10px]"
+                        type="submit"
+                        disabled={!isValidPairingCode(pairingCode)}
+                        className="w-full h-10 bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-[var(--bg-hover)] disabled:text-[var(--text-muted)] text-[var(--accent-contrast)] text-xs font-medium rounded transition flex items-center justify-center space-x-1.5 cursor-pointer disabled:cursor-not-allowed"
                       >
-                        <Trash2 className="w-2.5 h-2.5" />
-                        <span>Clear</span>
+                        <span>Connect to Host</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </form>
+
+                    {/* Recent Codes */}
+                    {recentCodes.length > 0 && (
+                      <div className="pt-3 border-t border-[var(--border-subtle)]">
+                        <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)] mb-2 font-mono">
+                          <span>Recent Sessions</span>
+                          <button
+                            onClick={clearRecentCodes}
+                            className="hover:text-[var(--text-secondary)] transition cursor-pointer flex items-center space-x-1 text-[10px]"
+                          >
+                            <Trash2 className="w-2.5 h-2.5" />
+                            <span>Clear</span>
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {recentCodes.map((code) => (
+                            <button
+                              key={code}
+                              onClick={() => {
+                                setPairingCode(code);
+                                handleConnectCode(undefined, code);
+                              }}
+                              className="px-2.5 py-1 rounded bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] font-mono text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition cursor-pointer"
+                            >
+                              {code}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Local Loopback Alternative */}
+                    <div className="pt-3 border-t border-[var(--border-subtle)]">
+                      <button
+                        type="button"
+                        onClick={handleConnectLocal}
+                        className="w-full h-9 bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium rounded transition flex items-center justify-center space-x-2 cursor-pointer font-mono"
+                      >
+                        <Laptop className="w-3.5 h-3.5 text-[var(--accent)]" />
+                        <span>Connect to Local PTY (127.0.0.1:3000)</span>
                       </button>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {recentCodes.map((code) => (
+                  </>
+                ) : (
+                  /* Host Mode Details */
+                  <div className="space-y-4">
+                    {/* OS Platform Selector */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)] font-mono">
+                          1. Install Agent CLI
+                        </span>
+                        <div className="flex space-x-1">
+                          <button
+                            type="button"
+                            onClick={() => setInstallOs('windows')}
+                            className={`px-2 py-0.5 text-[10px] rounded font-mono transition cursor-pointer ${
+                              installOs === 'windows'
+                                ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-medium'
+                                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-[var(--bg-canvas)] border border-[var(--border-default)]'
+                            }`}
+                          >
+                            Windows
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setInstallOs('linux')}
+                            className={`px-2 py-0.5 text-[10px] rounded font-mono transition cursor-pointer ${
+                              installOs === 'linux'
+                                ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-medium'
+                                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-[var(--bg-canvas)] border border-[var(--border-default)]'
+                            }`}
+                          >
+                            Linux
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setInstallOs('cargo')}
+                            className={`px-2 py-0.5 text-[10px] rounded font-mono transition cursor-pointer ${
+                              installOs === 'cargo'
+                                ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-medium'
+                                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-[var(--bg-canvas)] border border-[var(--border-default)]'
+                            }`}
+                          >
+                            Cargo
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Snippet Card */}
+                      <div className="relative bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded p-2.5 flex items-center justify-between group">
+                        <div className="overflow-x-auto text-left font-mono text-xs text-[var(--text-primary)] pr-8 py-0.5 scrollbar-thin">
+                          {installOs === 'windows' && (
+                            <code>irm https://raw.githubusercontent.com/reck98/Shellvyn/main/scripts/install-windows.ps1 | iex</code>
+                          )}
+                          {installOs === 'linux' && (
+                            <code>curl -fsSL https://raw.githubusercontent.com/reck98/Shellvyn/main/scripts/install-linux.sh | bash</code>
+                          )}
+                          {installOs === 'cargo' && (
+                            <code>cargo install --git https://github.com/reck98/Shellvyn shellvyn-agent</code>
+                          )}
+                        </div>
                         <button
-                          key={code}
+                          type="button"
                           onClick={() => {
-                            setPairingCode(code);
-                            handleConnectCode(undefined, code);
+                            const cmd =
+                              installOs === 'windows'
+                                ? 'irm https://raw.githubusercontent.com/reck98/Shellvyn/main/scripts/install-windows.ps1 | iex'
+                                : installOs === 'linux'
+                                ? 'curl -fsSL https://raw.githubusercontent.com/reck98/Shellvyn/main/scripts/install-linux.sh | bash'
+                                : 'cargo install --git https://github.com/reck98/Shellvyn shellvyn-agent';
+                            copySnippet(cmd, 'install');
                           }}
-                          className="px-2.5 py-1 rounded bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] font-mono text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition cursor-pointer"
+                          className="absolute right-2 top-2 p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition cursor-pointer bg-[var(--bg-surface)] border border-[var(--border-default)] rounded"
+                          title="Copy command"
                         >
-                          {code}
+                          {copiedSnippet === 'install' ? (
+                            <Check className="w-3.5 h-3.5 text-[var(--accent)]" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
                         </button>
-                      ))}
+                      </div>
+                    </div>
+
+                    {/* Step 2: Run Command */}
+                    <div>
+                      <span className="block text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)] mb-2 font-mono">
+                        2. Start Terminal Session
+                      </span>
+                      <div className="relative bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded p-2.5 flex items-center justify-between">
+                        <code className="font-mono text-xs text-[var(--accent)] font-semibold">
+                          shellvyn share
+                        </code>
+                        <button
+                          type="button"
+                          onClick={() => copySnippet('shellvyn share', 'share')}
+                          className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition cursor-pointer bg-[var(--bg-surface)] border border-[var(--border-default)] rounded"
+                          title="Copy command"
+                        >
+                          {copiedSnippet === 'share' ? (
+                            <Check className="w-3.5 h-3.5 text-[var(--accent)]" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-[var(--text-secondary)] mt-1.5 leading-relaxed">
+                        The agent will generate an 8-character pairing code you can share with guests to view or collaborate.
+                      </p>
+                    </div>
+
+                    {/* Direct Binary Downloads */}
+                    <div className="pt-3 border-t border-[var(--border-subtle)] space-y-2">
+                      <span className="block text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)] font-mono">
+                        Manual Standalone Downloads
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        <a
+                          href="https://github.com/reck98/Shellvyn/releases/latest/download/shellvyn-windows-x86_64.zip"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-center space-x-1.5 px-3 py-2 rounded bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-mono transition"
+                        >
+                          <Download className="w-3 h-3 text-[var(--accent)]" />
+                          <span>Windows (.exe)</span>
+                        </a>
+                        <a
+                          href="https://github.com/reck98/Shellvyn/releases/latest/download/shellvyn-linux-x86_64.tar.gz"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-center space-x-1.5 px-3 py-2 rounded bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-mono transition"
+                        >
+                          <Download className="w-3 h-3 text-[var(--accent)]" />
+                          <span>Linux (x64)</span>
+                        </a>
+                      </div>
+                      <div className="text-center pt-1">
+                        <a
+                          href="https://github.com/reck98/Shellvyn/releases"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center space-x-1 text-[11px] text-[var(--text-muted)] hover:text-[var(--accent)] font-mono transition"
+                        >
+                          <span>View all platform releases on GitHub</span>
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                      </div>
                     </div>
                   </div>
                 )}
-
-                {/* Local Loopback Alternative */}
-                <div className="pt-3 border-t border-[var(--border-subtle)]">
-                  <button
-                    type="button"
-                    onClick={handleConnectLocal}
-                    className="w-full h-9 bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium rounded transition flex items-center justify-center space-x-2 cursor-pointer font-mono"
-                  >
-                    <Laptop className="w-3.5 h-3.5 text-[var(--accent)]" />
-                    <span>Connect to Local PTY (127.0.0.1:3000)</span>
-                  </button>
-                </div>
               </div>
 
               {/* Technical Specifications (Minimal, High Density) */}

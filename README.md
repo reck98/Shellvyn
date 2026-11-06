@@ -276,7 +276,28 @@ Shellvyn uses a binary wire framing format (`v2`) inside encrypted AEAD envelope
 
 ## Getting Started
 
-### Prerequisites
+### Quick Install (Host Agent)
+
+To install the standalone `shellvyn` host agent directly without building from source:
+
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/reck98/Shellvyn/main/scripts/install-windows.ps1 | iex
+```
+
+**Linux & macOS (Bash / curl):**
+```bash
+curl -fsSL https://raw.githubusercontent.com/reck98/Shellvyn/main/scripts/install-linux.sh | bash
+```
+
+Once installed, share your terminal in one command:
+```bash
+shellvyn share
+```
+
+---
+
+### Prerequisites (For Building from Source)
 
 - **Rust**: Version 1.80 or later (`rustup default stable`).
   - *Windows*: Visual Studio C++ Build Tools or 64-bit MinGW toolchain.
