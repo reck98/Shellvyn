@@ -1,4 +1,5 @@
 use crate::error::{CoreError, Result};
+use base64::prelude::*;
 use chacha20poly1305::aead::{Aead, KeyInit};
 use chacha20poly1305::{ChaCha20Poly1305, Nonce};
 use hkdf::Hkdf;
@@ -60,6 +61,20 @@ pub fn decrypt_frame(key: &[u8; 32], payload: &[u8]) -> Result<Vec<u8>> {
     Ok(plaintext)
 }
 
+/// Encrypts plaintext and returns a standard Base64-encoded string for relay transmission.
+pub fn encrypt_to_base64(key: &[u8; 32], plaintext: &[u8]) -> Result<String> {
+    let encrypted = encrypt_frame(key, plaintext)?;
+    Ok(BASE64_STANDARD.encode(encrypted))
+}
+
+/// Decodes Base64-encoded ciphertext and decrypts it with ChaCha20-Poly1305.
+pub fn decrypt_from_base64(key: &[u8; 32], b64_payload: &str) -> Result<Vec<u8>> {
+    let bytes = BASE64_STANDARD
+        .decode(b64_payload)
+        .map_err(|e| CoreError::Crypto(format!("Invalid base64 payload: {:?}", e)))?;
+    decrypt_frame(key, &bytes)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -78,6 +93,20 @@ mod tests {
 
         let decrypted = decrypt_frame(&key, &encrypted).unwrap();
         assert_eq!(&decrypted[..], original_data);
+    }
+
+    #[test]
+    fn test_base64_relay_encryption_roundtrip() {
+        let secret = "KV7M-9X2P";
+        let salt = b"relay-salt-98765";
+        let key = derive_session_key(secret, salt).unwrap();
+
+        let original = b"relay packet data payload";
+        let b64 = encrypt_to_base64(&key, original).unwrap();
+        assert!(!b64.is_empty());
+
+        let decrypted = decrypt_from_base64(&key, &b64).unwrap();
+        assert_eq!(&decrypted[..], original);
     }
 
     #[test]

@@ -9,6 +9,11 @@ import {
 } from './protocol/framing';
 import { normalizePairingCode, isValidPairingCode } from './protocol/pairing';
 import {
+  deriveSessionKey,
+  encryptToBase64,
+  decryptFromBase64,
+} from './protocol/crypto';
+import {
   Shield,
   Terminal as TerminalIcon,
   Wifi,
@@ -34,6 +39,9 @@ export const App: React.FC = () => {
 
   const socketRef = useRef<WebSocket | null>(null);
   const terminalRef = useRef<Terminal | null>(null);
+  const sessionKeyRef = useRef<Uint8Array | null>(null);
+  const hostIdRef = useRef<string | null>(null);
+  const clientIdRef = useRef<string>(`viewer-${Math.random().toString(36).substring(2, 9)}`);
 
   // Clean up socket on unmount
   useEffect(() => {
@@ -44,16 +52,26 @@ export const App: React.FC = () => {
     };
   }, []);
 
-  const connectWebSocket = useCallback((url: string) => {
+  const connectWebSocket = useCallback((url: string, isRemote: boolean = false, codeForE2ee?: string) => {
     setConnState('awaiting_approval');
     setDisconnectReason(null);
+    sessionKeyRef.current = null;
+    hostIdRef.current = null;
 
     const ws = new WebSocket(url);
     ws.binaryType = 'arraybuffer';
     socketRef.current = ws;
 
     ws.onopen = () => {
-      setConnState('connected');
+      if (isRemote && codeForE2ee) {
+        // Send Join request to signaling server
+        ws.send(JSON.stringify({
+          type: 'join',
+          code: codeForE2ee,
+        }));
+      } else {
+        setConnState('connected');
+      }
     };
 
     ws.onmessage = (event) => {
@@ -86,11 +104,42 @@ export const App: React.FC = () => {
       } else if (typeof event.data === 'string') {
         try {
           const msg = JSON.parse(event.data);
-          if (msg.type === 'registered') {
-            setConnState('connected');
-          } else if (msg.type === 'join_result' && msg.status === 'connected') {
-            setConnState('connected');
-            if (msg.hostname) setRemoteHostname(msg.hostname);
+          if (msg.type === 'join_result') {
+            if (msg.status === 'connected') {
+              if (msg.host_id) hostIdRef.current = msg.host_id;
+              if (msg.hostname) setRemoteHostname(msg.hostname);
+              if (msg.permission) {
+                setPermission(msg.permission === 'read_only' ? PermissionMode.ReadOnly : PermissionMode.Interactive);
+              }
+              // Derive zero-knowledge symmetric key from pairing code & session salt
+              if (codeForE2ee && msg.session_salt) {
+                const saltBytes = new TextEncoder().encode(msg.session_salt);
+                sessionKeyRef.current = deriveSessionKey(codeForE2ee, saltBytes);
+              }
+              setConnectionMode('relay');
+              setConnState('connected');
+            } else {
+              setDisconnectReason(msg.message || `Join rejected: ${msg.status}`);
+              setConnState('disconnected');
+            }
+          } else if (msg.type === 'relay_data') {
+            // Decrypt opaque relay ciphertext using ChaCha20-Poly1305 session key
+            if (sessionKeyRef.current && msg.payload) {
+              try {
+                const frameBytes = decryptFromBase64(sessionKeyRef.current, msg.payload);
+                const frame = decodeFrame(frameBytes);
+                if (frame.type === 'data' && terminalRef.current) {
+                  terminalRef.current.write(frame.data);
+                } else if (frame.type === 'close') {
+                  setDisconnectReason(frame.reason || 'Host closed session');
+                  setConnState('disconnected');
+                } else if (frame.type === 'permission') {
+                  setPermission(frame.mode);
+                }
+              } catch (e) {
+                console.error('Failed to decrypt relay payload:', e);
+              }
+            }
           } else if (msg.type === 'error') {
             setDisconnectReason(msg.message);
             setConnState('disconnected');
@@ -117,17 +166,16 @@ export const App: React.FC = () => {
     const wsUrl = `ws://${window.location.hostname || '127.0.0.1'}:3000/ws`;
     setConnectionMode('loopback');
     setRemoteHostname('Local Host PTY');
-    connectWebSocket(wsUrl);
+    connectWebSocket(wsUrl, false);
   };
 
   const handleConnectCode = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValidPairingCode(pairingCode)) return;
 
-    // Connect to signaling server
+    const normalized = normalizePairingCode(pairingCode);
     const signalingUrl = `ws://${window.location.hostname || '127.0.0.1'}:8080/ws`;
-    setConnectionMode('webrtc');
-    connectWebSocket(signalingUrl);
+    connectWebSocket(signalingUrl, true, normalized);
   };
 
   const handleDisconnect = () => {
@@ -135,6 +183,8 @@ export const App: React.FC = () => {
       socketRef.current.close();
       socketRef.current = null;
     }
+    sessionKeyRef.current = null;
+    hostIdRef.current = null;
     setConnState('idle');
   };
 
@@ -142,7 +192,18 @@ export const App: React.FC = () => {
     if (permission === PermissionMode.ReadOnly) return;
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
       const frame = encodeData(input);
-      socketRef.current.send(frame.buffer as ArrayBuffer);
+      if (connectionMode === 'relay' && sessionKeyRef.current && hostIdRef.current) {
+        // Encrypt frame with ChaCha20-Poly1305 and send via RelayData
+        const b64 = encryptToBase64(sessionKeyRef.current, frame);
+        socketRef.current.send(JSON.stringify({
+          type: 'relay_data',
+          from_id: clientIdRef.current,
+          target_id: hostIdRef.current,
+          payload: b64,
+        }));
+      } else {
+        socketRef.current.send(frame.buffer as ArrayBuffer);
+      }
     }
   };
 
@@ -150,7 +211,17 @@ export const App: React.FC = () => {
     setTerminalDimensions({ cols, rows });
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
       const frame = encodeResize(cols, rows);
-      socketRef.current.send(frame.buffer as ArrayBuffer);
+      if (connectionMode === 'relay' && sessionKeyRef.current && hostIdRef.current) {
+        const b64 = encryptToBase64(sessionKeyRef.current, frame);
+        socketRef.current.send(JSON.stringify({
+          type: 'relay_data',
+          from_id: clientIdRef.current,
+          target_id: hostIdRef.current,
+          payload: b64,
+        }));
+      } else {
+        socketRef.current.send(frame.buffer as ArrayBuffer);
+      }
     }
   };
 

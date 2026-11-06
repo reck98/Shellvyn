@@ -21,3 +21,6 @@ clap.workspace = true
 thiserror.workspace = true
 bytes.workspace = true
 rand.workspace = true
+
+[dev-dependencies]
+shellvyn-signaling = { path = "../shellvyn-signaling" }

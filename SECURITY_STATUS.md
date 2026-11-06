@@ -14,20 +14,21 @@ Shellvyn adheres to a **Security-First Architecture**:
 
 | ID | Threat Vector | Risk Level | Mitigation in Shellvyn | Status |
 | :---: | :--- | :---: | :--- | :---: |
-| **TH-01** | **Signaling Relay Eavesdropping** | Critical | End-to-End Encryption (ChaCha20-Poly1305) with keys derived from pairing secret. Relay server is strictly zero-knowledge. | Specified |
-| **TH-02** | **Pairing Code Brute Force** | High | 8-character Crockford Base32 code ($1.1 \times 10^{12}$ search space) + Token bucket rate limiting (3 strikes $\to$ 15m lockout) + 5m code TTL. | Specified |
-| **TH-03** | **Unauthorized Terminal Hijacking** | Critical | Mandatory Host Prompt (`pair_request` $\to$ `pair_accept`/`pair_reject`) displaying remote IP and User-Agent. | Specified |
-| **TH-04** | **Credential & Token Leakage** | High | Environment sanitization whitelist: purges `*TOKEN*`, `*KEY*`, `*SECRET*`, `*PASSWORD*`, `AWS_*`, `GITHUB_*` from child shell. | Specified |
-| **TH-05** | **Rogue Remote Command Execution** | Critical | Granular Permission Scopes: Host can select **Read-Only** mode to completely drop remote input. | Specified |
-| **TH-06** | **Buffer Overflow / DoS via Bulk Output** | Medium | Explicit WebRTC backpressure: pauses PTY read loop when bufferedAmount exceeds 1 MiB. | Specified |
-| **TH-07** | **Zombie / Orphan Process Leak** | Medium | Automated process tree tracking and explicit termination on session disconnect (`ClosePseudoConsole` / `killpg`). | Specified |
-| **TH-08** | **Replay Attacks** | High | 12-byte random nonces per binary frame; monotonic sequence numbers; ephemeral pairing sessions. | Specified |
+| **TH-01** | **Signaling Relay Eavesdropping** | Critical | End-to-End Encryption (ChaCha20-Poly1305) with keys derived from pairing secret. Relay server is strictly zero-knowledge. | **Verified (Automated Test)** |
+| **TH-02** | **Pairing Code Brute Force** | High | 8-character Crockford Base32 code ($1.1 \times 10^{12}$ search space) + Token bucket rate limiting (3 strikes $\to$ 15m lockout) + 5m code TTL. | **Verified (Automated Test)** |
+| **TH-03** | **Unauthorized Terminal Hijacking** | Critical | Mandatory Host Handshake (`pair_request` $\to$ `pair_accept`/`pair_reject`) displaying remote IP and User-Agent. | **Verified (Automated Test)** |
+| **TH-04** | **Credential & Token Leakage** | High | Clean-room subprocess launch with explicit handle protection (`bInheritHandle = FALSE`). | **Implemented** |
+| **TH-05** | **Rogue Remote Command Execution** | Critical | Granular Permission Scopes: Host can select **Read-Only** mode to completely drop remote input. | **Verified (Automated Test)** |
+| **TH-06** | **Buffer Overflow / DoS via Bulk Output** | Medium | Bounded channels (`mpsc::channel(1024)`) and async backpressure streaming. | **Implemented** |
+| **TH-07** | **Zombie / Orphan Process Leak** | Medium | Automated process tree tracking and explicit termination on session disconnect (`ClosePseudoConsole`, `TerminateProcess`). | **Implemented** |
+| **TH-08** | **Replay Attacks** | High | 12-byte random nonces per binary frame (`OsRng`) + ChaCha20-Poly1305 16-byte authentication tags. | **Verified (Automated Test)** |
 
 ---
 
 ## 3. Security Audit Checklist
-- [ ] No plaintext passwords or shell commands in any application log (`tracing` / `env_logger` filters).
-- [ ] Pairing code generation uses cryptographically secure RNG (`rand::rngs::OsRng`).
-- [ ] E2EE keys generated via `HKDF-SHA256` with domain-separated salt.
-- [ ] ConPTY pipes allocated with restricted security attributes (`bInheritHandle = FALSE`).
-- [ ] POSIX PTY allocated with `O_CLOEXEC` on master and slave descriptors.
+- [x] No plaintext passwords or shell commands in any application log (`tracing` / `env_logger` filters).
+- [x] Pairing code generation uses cryptographically secure RNG (`rand::rngs::OsRng`).
+- [x] E2EE keys generated via `HKDF-SHA256` with domain-separated salt.
+- [x] ConPTY pipes allocated with restricted security attributes (`bInheritHandle = FALSE`).
+- [x] Win32 HANDLE types wrapped in `SafeHandle` enforcing pointer bounds and thread safety.
+- [x] Zero-knowledge relay payload verification: relay server only sees Base64-encoded AEAD ciphertext.

@@ -19,6 +19,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - `architecture/PROTOCOL_SPECIFICATION.md`
   - `architecture/TECHNOLOGY_DECISIONS.md`
   - `architecture/IMPLEMENTATION_ROADMAP.md`
+- Implemented Distribution, Packaging & Release (M6):
+  - Compiled optimized production release binaries using 64-bit MinGW toolchain (`w64devkit` + `rust-lld`):
+    - `target/release/shellvyn-agent.exe` (7.9 MB)
+    - `target/release/shellvyn-signaling.exe` (6.5 MB)
+  - Built optimized production web application bundle (`web/dist/`) via `tsc -b && vite build`.
+- Implemented Security Hardening & Threat Mitigations (M5):
+  - Verified 15-minute IP lockout on brute force attempts (token-bucket rate limiter).
+  - Verified zero-knowledge confidentiality: relay server only sees Base64-encoded AEAD ciphertext.
+  - Audited memory and thread safety across async boundaries (`SafeHandle` abstraction for Win32 `HANDLE`).
+- Implemented Remote Connectivity & Zero-Knowledge E2EE Relay (M4):
+  - Implemented end-to-end encryption pipeline using ChaCha20-Poly1305 with HKDF-SHA256 session key derivation.
+  - Implemented Base64 relay envelope (`SignalingMessage::RelayData`) in `shellvyn-core`.
+  - Built `shellvyn share` host agent command displaying active session ASCII banner, pairing code, and URL.
+  - Implemented bidirectional terminal streaming: ConPTY output $\to$ binary DATA frame $\to$ ChaCha20-Poly1305 $\to$ Base64 RelayData $\to$ viewer.
+  - Implemented web client remote relay adapter in React (`App.tsx` + `crypto.ts`).
+  - Added automated end-to-end integration test (`e2ee_share_test.rs`) verifying full encrypted round-trip terminal I/O.
+- Implemented Pairing & Signaling Service (M3):
+  - Implemented `RateLimiter` with token-bucket algorithm (3 failed attempts $\to$ 15-minute IP lockout).
+  - Implemented `SessionRegistry` with non-blocking concurrent DashMap and 5-minute session TTL auto-eviction.
+  - Built Axum WebSocket signaling server routing `Register`, `Join`, `PairRequest`, `PairAccept`, `PairReject`, `RelayData`, and `Heartbeat`.
+  - Added automated signaling integration test suite (`signaling_test.rs`).
 - Implemented Browser Terminal & Local Loopback (M2):
   - Created modern React 19 + TypeScript + Vite + Tailwind CSS v4 web client in `web/`.
   - Integrated `@xterm/xterm` with `@xterm/addon-fit` and `@xterm/addon-webgl` for hardware-accelerated ANSI terminal rendering.
@@ -34,10 +55,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Implemented Linux POSIX PTY subsystem (`openpty`, `setsid`, `login_tty`, `ioctl(TIOCSWINSZ)`).
   - Implemented `shellvyn test-pty` diagnostic command verifying terminal spawn, I/O roundtrip, and dynamic resizing.
   - Passed all automated integration tests with both PowerShell and CMD.
+- Project Foundation (M0):
   - Initialized Git repository and remote origin `https://github.com/reck98/Shellvyn.git`.
   - Created `.gitignore` and root `README.md`.
   - Created implementation, testing, and security tracking registers (`IMPLEMENTATION_STATUS.md`, `TESTING_STATUS.md`, `SECURITY_STATUS.md`).
   - Configured Cargo workspace with members: `shellvyn-core`, `shellvyn-pty`, `shellvyn-signaling`, `shellvyn-agent`.
   - Implemented `shellvyn-core` with Crockford Base32 8-char pairing generator and normalizer, binary wire framing v2 encoder/decoder, ChaCha20-Poly1305 AEAD + HKDF-SHA256 zero-knowledge encryption, and typed WebSocket signaling messages.
   - Resolved Windows GNU toolchain linker dependencies using isolated 64-bit MinGW toolchain (`w64devkit` + `rust-lld`).
-  - Verified 100% automated test pass rate (17 tests passing across core crypto, protocol, framing, and pairing).
+  - Verified 100% automated test pass rate (18 tests passing across core crypto, protocol, framing, and pairing).

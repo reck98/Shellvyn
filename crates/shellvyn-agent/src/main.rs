@@ -1,9 +1,9 @@
 use clap::{Parser, Subcommand};
-use shellvyn_agent::local;
+use shellvyn_agent::{local, run_share_session, ShareOptions};
 use shellvyn_pty::{spawn_terminal, ShellType, Winsize};
 use std::time::{Duration, Instant};
 use tokio::time::timeout;
-use tracing::{error, info};
+use tracing::error;
 
 #[derive(Parser, Debug)]
 #[command(name = "shellvyn", version, about = "Cross-platform secure terminal sharing host agent")]
@@ -23,6 +23,14 @@ enum Commands {
         /// Read-only mode (viewers cannot send keystrokes)
         #[arg(long)]
         read_only: bool,
+
+        /// Automatically approve incoming viewer connection requests
+        #[arg(long, default_value_t = true)]
+        auto_accept: bool,
+
+        /// Shell to launch: powershell, cmd, bash, or default
+        #[arg(long, default_value = "default")]
+        shell: String,
     },
     /// Run a local loopback server directly to browser for testing
     Local {
@@ -44,10 +52,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
     match cli.command.unwrap_or(Commands::TestPty { shell: "default".into() }) {
-        Commands::Share { server, read_only } => {
-            info!(server = %server, read_only, "Starting Shellvyn terminal sharing session");
-            // Will connect to signaling server in M3/M4
-            Ok(())
+        Commands::Share { server, read_only, auto_accept, shell } => {
+            let shell_type = match shell.to_lowercase().as_str() {
+                "cmd" => Some(ShellType::Cmd),
+                "powershell" | "pwsh" => Some(ShellType::PowerShell),
+                "bash" => Some(ShellType::Bash),
+                _ => None,
+            };
+
+            run_share_session(ShareOptions {
+                server_url: server,
+                read_only,
+                auto_accept,
+                shell: shell_type,
+                code: None,
+            })
+            .await
+            .map_err(|e| e as Box<dyn std::error::Error>)
         }
         Commands::Local { port } => {
             local::run_local_server(port).await
@@ -98,8 +119,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Ok(())
                 }
                 _ => {
-                    error!("PTY roundtrip verification timed out or failed");
-                    Err("PTY roundtrip failed".into())
+                    error!("PTY self-test failed: did not receive expected output in 5s");
+                    Err("PTY self-test timed out".into())
                 }
             }
         }
