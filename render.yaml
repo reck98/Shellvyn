@@ -1,0 +1,58 @@
+# ==============================================================================
+# Shellvyn Render Blueprint (render.yaml)
+# Production Infrastructure Specification
+# https://render.com/docs/blueprint-spec
+# ==============================================================================
+# Architecture:
+# 1. shellvyn-signaling: Dockerized Axum signaling & encrypted relay service
+# 2. shellvyn-web: High-performance global CDN static frontend (React + Vite)
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # Service A: Shellvyn Signaling & Relay WebSocket Service
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: shellvyn-signaling
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    region: oregon
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: RUST_LOG
+        value: info,shellvyn_signaling=info
+      - key: PORT
+        value: 10000
+
+  # ----------------------------------------------------------------------------
+  # Service B: Shellvyn Web Client (React 19 + Vite Static Site)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: shellvyn-web
+    runtime: static
+    rootDir: web
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    branch: main
+    autoDeploy: true
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_SIGNALING_URL
+        value: wss://shellvyn-signaling.onrender.com/ws

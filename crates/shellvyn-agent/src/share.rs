@@ -9,6 +9,7 @@ use shellvyn_core::framing::Frame;
 use shellvyn_core::pairing::generate_pairing_code;
 use shellvyn_core::protocol::{HostOs, SessionPermission, SignalingMessage};
 use shellvyn_pty::{spawn_terminal, ShellType, Winsize};
+use std::io::Write;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::mpsc;
@@ -191,8 +192,27 @@ pub async fn run_share_session(opts: ShareOptions) -> Result<(), Box<dyn std::er
                             println!("[Shellvyn] Auto-accept enabled. Connection approved.");
                             true
                         } else {
-                            // Default to approving when run non-interactively or auto_accept
-                            true
+                            print!("[Shellvyn] Approve connection from {} ({})? [y/N]: ", remote_ip, user_agent);
+                            let _ = std::io::stdout().flush();
+
+                            let (prompt_tx, prompt_rx) = tokio::sync::oneshot::channel();
+                            tokio::task::spawn_blocking(move || {
+                                let mut input = String::new();
+                                if std::io::stdin().read_line(&mut input).is_ok() {
+                                    let trimmed = input.trim().to_lowercase();
+                                    let _ = prompt_tx.send(trimmed == "y" || trimmed == "yes");
+                                } else {
+                                    let _ = prompt_tx.send(false);
+                                }
+                            });
+
+                            match timeout(Duration::from_secs(30), prompt_rx).await {
+                                Ok(Ok(decision)) => decision,
+                                _ => {
+                                    println!("\n[Shellvyn] Approval timed out or declined. Connection rejected.");
+                                    false
+                                }
+                            }
                         };
 
                         if approved {

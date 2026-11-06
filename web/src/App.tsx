@@ -207,6 +207,27 @@ export const App: React.FC = () => {
     };
   }, []);
 
+  const getSignalingUrl = useCallback((): string => {
+    // 1. Environment variable configured at build time (e.g. Render / Production)
+    const envUrl = import.meta.env.VITE_SIGNALING_URL;
+    if (envUrl && typeof envUrl === 'string' && envUrl.trim().length > 0) {
+      return envUrl.trim();
+    }
+
+    // 2. Dynamic runtime detection
+    const isHttps = window.location.protocol === 'https:';
+    const hostname = window.location.hostname || '127.0.0.1';
+
+    // Local development loopback fallback
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `ws://${hostname}:8080/ws`;
+    }
+
+    // Production HTTPS / WSS termination fallback
+    const wsProto = isHttps ? 'wss:' : 'ws:';
+    return `${wsProto}//${window.location.host}/ws`;
+  }, []);
+
   const handleConnectLocal = () => {
     const wsUrl = `ws://${window.location.hostname || '127.0.0.1'}:3000/ws`;
     setConnectionMode('loopback');
@@ -220,7 +241,7 @@ export const App: React.FC = () => {
     if (!isValidPairingCode(targetCode)) return;
 
     const normalized = normalizePairingCode(targetCode);
-    const signalingUrl = `ws://${window.location.hostname || '127.0.0.1'}:8080/ws`;
+    const signalingUrl = getSignalingUrl();
     connectWebSocket(signalingUrl, true, normalized);
   };
 

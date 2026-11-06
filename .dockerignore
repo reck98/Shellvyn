@@ -1,0 +1,14 @@
+target/
+.git/
+.github/
+web/
+docs/
+scratch/
+tests/
+*.md
+*.png
+*.webp
+*.svg
+.env*
+.vscode/
+.idea/

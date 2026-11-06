@@ -1,0 +1,40 @@
+services:
+  # ============================================================================
+  # Shellvyn Signaling & Relay Service
+  # ============================================================================
+  signaling:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shellvyn/signaling:latest
+    container_name: shellvyn-signaling
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - RUST_LOG=info,shellvyn_signaling=debug
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # ============================================================================
+  # Optional: Static Web Client for Local Testing
+  # ============================================================================
+  web:
+    image: node:22-alpine
+    container_name: shellvyn-web
+    working_dir: /app
+    volumes:
+      - ./web:/app
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_SIGNALING_URL=ws://localhost:8080/ws
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    depends_on:
+      signaling:
+        condition: service_healthy

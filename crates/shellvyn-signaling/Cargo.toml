@@ -19,3 +19,4 @@ tracing-subscriber.workspace = true
 dashmap.workspace = true
 rand.workspace = true
 thiserror.workspace = true
+clap = { workspace = true }
