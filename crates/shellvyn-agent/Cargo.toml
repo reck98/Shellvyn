@@ -10,6 +10,7 @@ description = "Native host agent for Shellvyn"
 shellvyn-core.workspace = true
 shellvyn-pty.workspace = true
 tokio.workspace = true
+axum.workspace = true
 tokio-tungstenite.workspace = true
 futures-util.workspace = true
 serde.workspace = true

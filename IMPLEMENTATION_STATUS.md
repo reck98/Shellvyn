@@ -15,8 +15,8 @@
 | :---: | :--- | :---: | :---: | :---: | :---: |
 | **M0** | **Project Foundation & Workspace** | **Completed** | 100% | 2026-11-07 | 2026-11-07 |
 | **M1** | **Local Terminal Agent & PTY Subsystems** | **Completed** | 100% | 2026-11-07 | 2026-11-07 |
-| **M2** | **Browser Terminal & Local Loopback** | **In Progress** | 10% | 2026-11-07 | - |
-| **M3** | **Pairing & Signaling Service** | Pending | 0% | - | - |
+| **M2** | **Browser Terminal & Local Loopback** | **Completed** | 100% | 2026-11-07 | 2026-11-07 |
+| **M3** | **Pairing & Signaling Service** | **In Progress** | 15% | 2026-11-07 | - |
 | **M4** | **Remote Connectivity & E2EE Relay** | Pending | 0% | - | - |
 | **M5** | **Security Hardening & Stress Testing** | Pending | 0% | - | - |
 | **M6** | **Distribution, Packaging & Release** | Pending | 0% | - | - |
@@ -56,11 +56,15 @@
 - [x] Build standalone interactive CLI driver self-test (`shellvyn test-pty`) to verify local terminal streaming.
 
 ### M2 — Browser Terminal (Web Client)
-- [ ] Scaffold `web/` with Vite + React 19 + TypeScript + Tailwind CSS v4.
-- [ ] Integrate `@xterm/xterm` with `@xterm/addon-fit` and `@xterm/addon-webgl`.
-- [ ] Implement local WebSocket loopback server in `shellvyn-agent` (`shellvyn local`).
-- [ ] Connect web client directly to local agent over loopback WebSocket.
-- [ ] Verify full keyboard input, ANSI true-color output, and dynamic window resize.
+- [x] Scaffold `web/` with Vite + React 19 + TypeScript + Tailwind CSS v4.
+- [x] Integrate `@xterm/xterm` with `@xterm/addon-fit` and `@xterm/addon-webgl`.
+- [x] Implement binary frame decoder/encoder in TypeScript (`framing.ts`).
+- [x] Implement Crockford Base32 formatting, visual lookalike replacement, validation (`pairing.ts`).
+- [x] Implement ChaCha20-Poly1305 E2EE and HKDF-SHA256 crypto in TypeScript (`crypto.ts`).
+- [x] Implement local WebSocket loopback server in `shellvyn-agent` (`shellvyn local`).
+- [x] Connect web client directly to local agent over loopback WebSocket.
+- [x] Verify full keyboard input, ANSI true-color output, and dynamic window resize.
+- [x] Automated end-to-end integration test (`loopback_test.rs`).
 
 ### M3 — Pairing & Signaling Service
 - [ ] Implement Crockford Base32 8-char pairing generator with 5-minute TTL.

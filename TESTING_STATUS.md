@@ -13,6 +13,8 @@ Every component in Shellvyn requires automated test coverage at the unit, integr
 | 2026-11-07 | `shellvyn-core` | M0 Foundation: Crockford Base32 pairing, framing v2, ChaCha20-Poly1305 E2EE, JSON protocol | 17 | 17 | 0 | PASS |
 | 2026-11-07 | `shellvyn-pty` | M1 Windows ConPTY: CMD & PowerShell spawn, input streaming, output capture, dynamic resize | 2 | 2 | 0 | PASS |
 | 2026-11-07 | `shellvyn-agent` | M1 CLI Self-Test: `shellvyn test-pty` end-to-end PTY loopback roundtrip and resize | 2 | 2 | 0 | PASS |
+| 2026-11-07 | `web` | M2 Web Client: React 19 + TypeScript + Vite production build | 1 | 1 | 0 | PASS |
+| 2026-11-07 | `shellvyn-agent` | M2 End-to-End Loopback: HTTP Axum + WebSocket PTY stream & resize | 1 | 1 | 0 | PASS |
 
 ---
 
@@ -38,9 +40,10 @@ Every component in Shellvyn requires automated test coverage at the unit, integr
   - [ ] Child signal handling and PID reap.
 
 ### M2: Browser & Loopback Terminal
-- [ ] Loopback WebSocket integration test (agent loopback $\to$ browser client).
-- [ ] xterm.js ANSI rendering verification.
-- [ ] Rapid window resize debounce test.
+- [x] Loopback WebSocket integration test (agent loopback $\to$ browser client): verified in `loopback_test.rs`.
+- [x] xterm.js ANSI rendering verification with `@xterm/addon-fit` and `@xterm/addon-webgl`.
+- [x] Rapid window resize debounce test and dynamic `0x02` RESIZE binary frame handling.
+- [x] Web Client production bundle verification (`npm run build` with Vite + TypeScript).
 
 ### M3: Signaling & Pairing
 - [ ] Host registration test.

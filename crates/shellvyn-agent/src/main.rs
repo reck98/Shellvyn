@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use shellvyn_agent::local;
 use shellvyn_pty::{spawn_terminal, ShellType, Winsize};
 use std::time::{Duration, Instant};
 use tokio::time::timeout;
@@ -49,9 +50,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             Ok(())
         }
         Commands::Local { port } => {
-            info!(port, "Starting Shellvyn local loopback terminal server");
-            // Implemented in M2
-            Ok(())
+            local::run_local_server(port).await
         }
         Commands::TestPty { shell } => {
             println!("== Shellvyn PTY Subsystem Self-Test ==");

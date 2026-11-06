@@ -19,6 +19,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - `architecture/PROTOCOL_SPECIFICATION.md`
   - `architecture/TECHNOLOGY_DECISIONS.md`
   - `architecture/IMPLEMENTATION_ROADMAP.md`
+- Implemented Browser Terminal & Local Loopback (M2):
+  - Created modern React 19 + TypeScript + Vite + Tailwind CSS v4 web client in `web/`.
+  - Integrated `@xterm/xterm` with `@xterm/addon-fit` and `@xterm/addon-webgl` for hardware-accelerated ANSI terminal rendering.
+  - Implemented client-side binary wire framing (`framing.ts`) and Crockford Base32 input normalization (`pairing.ts`).
+  - Implemented client-side ChaCha20-Poly1305 AEAD and HKDF-SHA256 E2EE cryptography (`crypto.ts`) interoperable with Rust core.
+  - Built embedded HTTP and WebSocket local loopback server (`shellvyn local --port 3000`) in `shellvyn-agent` using Axum.
+  - Created automated end-to-end integration test (`loopback_test.rs`) verifying full-stack browser-to-PTY streaming over WebSocket.
 - Implemented Local Terminal Agent & PTY Subsystems (M1):
   - Created cross-platform `shellvyn-pty` crate with unified `TerminalSession` trait and `spawn_terminal` factory.
   - Implemented Windows `ConPtySession` using Windows ConPTY (`CreatePseudoConsole`, `STARTF_USESTDHANDLES`, `PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE`, `ResizePseudoConsole`).
