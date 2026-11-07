@@ -53,8 +53,12 @@ fn get_host_os() -> HostOs {
 
 /// Runs a terminal sharing session connecting to the signaling server.
 pub async fn run_share_session(opts: ShareOptions) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let pairing_code = opts.code.clone().unwrap_or_else(generate_pairing_code);
-    let display_code = format!("{}-{}", &pairing_code[0..4], &pairing_code[4..8]);
+    let pairing_code = match opts.code {
+        Some(ref code) => shellvyn_core::pairing::normalize_and_validate_code(code)
+            .map_err(|e| format!("Invalid pairing code '{}': {}", code, e))?,
+        None => generate_pairing_code(),
+    };
+    let display_code = pairing_code.clone();
     let hostname = get_hostname();
     let os = get_host_os();
 

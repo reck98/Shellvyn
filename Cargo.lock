@@ -1054,7 +1054,7 @@ dependencies = [
 
 [[package]]
 name = "shellvyn-agent"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "axum",
  "bytes",
@@ -1076,7 +1076,7 @@ dependencies = [
 
 [[package]]
 name = "shellvyn-core"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "base64",
  "bytes",
@@ -1092,7 +1092,7 @@ dependencies = [
 
 [[package]]
 name = "shellvyn-pty"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "async-trait",
  "bytes",
@@ -1106,7 +1106,7 @@ dependencies = [
 
 [[package]]
 name = "shellvyn-signaling"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "axum",
  "clap",
