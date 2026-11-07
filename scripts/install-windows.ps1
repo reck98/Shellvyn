@@ -76,12 +76,12 @@ if ($UserPath -notlike "*$InstallDir*") {
     $env:Path = "$env:Path;$InstallDir"
 }
 
-Write-Host "`n✓ Shellvyn installed successfully to $TargetPath" -ForegroundColor Green
+Write-Host "`nShellvyn installed successfully to $TargetPath" -ForegroundColor Green
 Write-Host ""
-Write-Host "╔════════════════════════════════════════════════════════════╗" -ForegroundColor DarkGreen
-Write-Host "║             SHELLVYN HOST AGENT READY                      ║" -ForegroundColor DarkGreen
-Write-Host "╠════════════════════════════════════════════════════════════╣" -ForegroundColor DarkGreen
-Write-Host "║  Run command: shellvyn share                               ║" -ForegroundColor White
-Write-Host "║  Help:        shellvyn --help                              ║" -ForegroundColor White
-Write-Host "╚════════════════════════════════════════════════════════════╝" -ForegroundColor DarkGreen
+Write-Host "============================================================" -ForegroundColor DarkGreen
+Write-Host "                SHELLVYN HOST AGENT READY                   " -ForegroundColor DarkGreen
+Write-Host "============================================================" -ForegroundColor DarkGreen
+Write-Host "  Run command: shellvyn share                               " -ForegroundColor White
+Write-Host "  Help:        shellvyn --help                              " -ForegroundColor White
+Write-Host "============================================================" -ForegroundColor DarkGreen
 Write-Host ""
