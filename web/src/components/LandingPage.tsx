@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Sun,
   Moon,
@@ -12,14 +12,16 @@ import {
   KeyRound,
   Trash2,
   Download,
-  ExternalLink,
   Cpu,
   Lock,
-  Zap,
   Activity,
   Layers,
   CheckCircle2,
+  Menu,
+  X,
+  ExternalLink,
 } from 'lucide-react';
+import { ShellvynLogo, ShellvynSymbol } from './ShellvynLogo';
 
 interface LandingPageProps {
   pairingCode: string;
@@ -40,6 +42,22 @@ interface LandingPageProps {
   normalizePairingCode: (code: string) => string;
 }
 
+/** Official GitHub vector mark */
+const GithubIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    aria-hidden="true"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+    />
+  </svg>
+);
+
 export const LandingPage: React.FC<LandingPageProps> = ({
   pairingCode,
   setPairingCode,
@@ -58,132 +76,292 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   isValidPairingCode,
   normalizePairingCode,
 }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
   return (
-    <div className="min-h-full flex flex-col bg-[var(--bg-canvas)] text-[var(--text-primary)]">
-      {/* 1. Global Navigation Bar */}
-      <header className="sticky top-0 z-30 h-14 bg-[var(--bg-canvas)]/90 backdrop-blur-md border-b border-[var(--border-default)] px-6 flex items-center justify-between">
-        {/* Brand identity */}
-        <div className="flex items-center space-x-3">
-          <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="32" height="32" rx="6" fill="var(--accent)" />
-            <path d="M7 11L13 16L7 21" stroke="var(--bg-canvas)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            <circle cx="21" cy="16" r="3.5" fill="var(--gold)" />
-            <path d="M15 16H17.5" stroke="var(--bg-canvas)" strokeWidth="2" strokeLinecap="round" />
-            <path d="M21 21.5V23" stroke="var(--gold)" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M21 9V10.5" stroke="var(--gold)" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          <div className="flex items-center space-x-2">
-            <span className="font-mono text-sm font-bold tracking-wider text-[var(--text-primary)]">
-              SHELLVYN
-            </span>
-            <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono rounded bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-muted)]">
+    <div className="min-h-full flex flex-col bg-[var(--bg-canvas)] text-[var(--text-primary)] antialiased selection:bg-[var(--term-selection)]">
+      {/* ====================================================================
+          1. Global Navigation Bar (Compact, 56px / h-14)
+          Strict Rule: GitHub button is located in the footer only.
+          ==================================================================== */}
+      <header className="sticky top-0 z-40 h-14 bg-[var(--bg-canvas)]/92 backdrop-blur-md border-b border-[var(--border-default)] transition-colors">
+        <div className="max-w-6xl mx-auto h-full px-4 sm:px-6 flex items-center justify-between">
+          {/* Brand Identity with Official Logo Asset */}
+          <div className="flex items-center space-x-3">
+            <a
+              href="#overview"
+              className="flex items-center space-x-2.5 focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] rounded py-1 px-1 -ml-1 transition-transform active:scale-[0.98]"
+              aria-label="Shellvyn home"
+            >
+              <ShellvynLogo symbolSize="w-6 h-6" />
+            </a>
+            <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-medium rounded bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-muted)] select-none">
               v0.1.0
             </span>
           </div>
+
+          {/* Desktop Anchor Navigation */}
+          <nav
+            className="hidden md:flex items-center space-x-7 text-xs font-mono text-[var(--text-secondary)]"
+            aria-label="Main Navigation"
+          >
+            <a
+              href="#overview"
+              className="hover:text-[var(--text-primary)] transition-colors py-1 focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] rounded"
+            >
+              Overview
+            </a>
+            <a
+              href="#connect"
+              className="hover:text-[var(--text-primary)] transition-colors py-1 focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] rounded"
+            >
+              Console
+            </a>
+            <a
+              href="#features"
+              className="hover:text-[var(--text-primary)] transition-colors py-1 focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] rounded"
+            >
+              Features
+            </a>
+            <a
+              href="#architecture"
+              className="hover:text-[var(--text-primary)] transition-colors py-1 focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] rounded"
+            >
+              Architecture
+            </a>
+            <a
+              href="#cli"
+              className="hover:text-[var(--text-primary)] transition-colors py-1 focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] rounded"
+            >
+              CLI Reference
+            </a>
+          </nav>
+
+          {/* Right Header Controls: Theme Toggle & Mobile Trigger */}
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={onToggleTheme}
+              className="w-9 h-9 rounded-md border border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] active:scale-95"
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-[var(--gold)]" />
+              ) : (
+                <Moon className="w-4 h-4 text-[var(--accent)]" />
+              )}
+            </button>
+
+            {/* Mobile Menu Button */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden w-9 h-9 rounded-md border border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] active:scale-95"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
 
-        {/* Desktop Anchor Navigation */}
-        <nav className="hidden md:flex items-center space-x-6 text-xs font-mono text-[var(--text-secondary)]">
-          <a href="#hero" className="hover:text-[var(--text-primary)] transition">Overview</a>
-          <a href="#architecture" className="hover:text-[var(--text-primary)] transition">Architecture</a>
-          <a href="#features" className="hover:text-[var(--text-primary)] transition">Features</a>
-          <a href="#cli" className="hover:text-[var(--text-primary)] transition">CLI Reference</a>
-        </nav>
-
-        {/* Header Actions */}
-        <div className="flex items-center space-x-2.5">
-          <a
-            href="https://github.com/reck98/Shellvyn"
-            target="_blank"
-            rel="noreferrer"
-            className="hidden sm:flex items-center space-x-1 px-2.5 py-1 text-xs font-mono rounded border border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition"
-          >
-            <span>GitHub</span>
-            <ExternalLink className="w-3 h-3 text-[var(--text-muted)]" />
-          </a>
-
-          <button
-            type="button"
-            onClick={onToggleTheme}
-            className="w-8 h-8 rounded border border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition cursor-pointer"
-            title="Toggle theme"
-          >
-            {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-          </button>
-        </div>
+        {/* Mobile Navigation Dropdown */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-b border-[var(--border-default)] bg-[var(--bg-canvas)] px-4 py-4 space-y-1 text-xs font-mono animate-in fade-in slide-in-from-top-2 duration-150">
+            <a
+              href="#overview"
+              onClick={closeMobileMenu}
+              className="block px-3 py-2.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition"
+            >
+              Overview
+            </a>
+            <a
+              href="#connect"
+              onClick={closeMobileMenu}
+              className="block px-3 py-2.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition"
+            >
+              Console & Session Join
+            </a>
+            <a
+              href="#features"
+              onClick={closeMobileMenu}
+              className="block px-3 py-2.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition"
+            >
+              Features & Precision
+            </a>
+            <a
+              href="#architecture"
+              onClick={closeMobileMenu}
+              className="block px-3 py-2.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition"
+            >
+              Zero-Knowledge Architecture
+            </a>
+            <a
+              href="#cli"
+              onClick={closeMobileMenu}
+              className="block px-3 py-2.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition"
+            >
+              CLI Reference
+            </a>
+          </div>
+        )}
       </header>
 
-      {/* 2. Hero Section */}
-      <section id="hero" className="border-b border-[var(--border-default)] px-6 py-12 md:py-18 max-w-6xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          {/* Left Column: Value Proposition & Interactive Console */}
-          <div className="lg:col-span-6 space-y-6">
-            <div className="space-y-3">
-              <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-[var(--bg-surface)] border border-[var(--border-default)] text-[11px] font-mono text-[var(--text-secondary)]">
-                <ShieldCheck className="w-3.5 h-3.5 text-[var(--accent)]" />
-                <span>Zero-Knowledge E2EE Terminal Streaming</span>
-              </div>
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight">
-                Secure terminal sharing for developers.
-              </h1>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                Stream your local Windows ConPTY or Linux PTY session directly to any browser with zero port-forwarding, zero cloud accounts, and zero software needed for guests.
-              </p>
-            </div>
+      {/* ====================================================================
+          2. Hero Section
+          Tagline: "Your terminal. Anywhere."
+          Focus: Clear value proposition, strong typography, zero jargon slop.
+          ==================================================================== */}
+      <section
+        id="overview"
+        className="border-b border-[var(--border-default)] px-4 sm:px-6 pt-12 pb-14 md:pt-20 md:pb-20 max-w-6xl mx-auto w-full"
+      >
+        <div className="max-w-3xl space-y-5 text-left">
+          {/* Restrained Technical Category Label */}
+          <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-md bg-[var(--bg-surface)] border border-[var(--border-default)] text-[11px] font-mono text-[var(--text-secondary)] select-none">
+            <ShieldCheck className="w-3.5 h-3.5 text-[var(--accent)]" />
+            <span>ZERO-KNOWLEDGE TERMINAL STREAMING</span>
+          </div>
 
-            {/* Interactive Console Card */}
-            <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-lg p-5 shadow-sm space-y-4">
+          {/* Core Brand Tagline Headline */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[var(--text-primary)] leading-[1.08]">
+            Your terminal. Anywhere.
+          </h1>
+
+          {/* Technical Value Proposition */}
+          <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed max-w-2xl">
+            Stream your local Windows ConPTY or Linux PTY session directly to any web browser.
+            Zero port-forwarding, zero cloud accounts, and zero software required for guests.
+          </p>
+
+          {/* Quick Actions & Technical Badges */}
+          <div className="pt-2 flex flex-wrap items-center gap-3">
+            <a
+              href="#connect"
+              onClick={() => setActiveConsoleTab('join')}
+              className="inline-flex items-center justify-center space-x-2 px-5 py-2.5 rounded-md bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-contrast)] text-xs font-mono font-medium transition shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] active:translate-y-px"
+            >
+              <Radio className="w-3.5 h-3.5" />
+              <span>Join a Session</span>
+            </a>
+
+            <a
+              href="#connect"
+              onClick={() => setActiveConsoleTab('host')}
+              className="inline-flex items-center justify-center space-x-2 px-5 py-2.5 rounded-md bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] text-[var(--text-primary)] text-xs font-mono font-medium transition cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] active:translate-y-px"
+            >
+              <TerminalIcon className="w-3.5 h-3.5 text-[var(--accent)]" />
+              <span>Host a Terminal</span>
+            </a>
+          </div>
+
+          {/* Engineering Specifications Strip */}
+          <div className="pt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-mono text-[var(--text-muted)] border-t border-[var(--border-subtle)]">
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]"></span>
+              <span>Windows ConPTY</span>
+            </span>
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]"></span>
+              <span>Linux POSIX PTY</span>
+            </span>
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)]"></span>
+              <span>ChaCha20-Poly1305 E2EE</span>
+            </span>
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)]"></span>
+              <span>Zero Cloud Logins</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ====================================================================
+          3. Interactive Product Centerpiece: Console & Live Terminal Preview
+          Preserves 100% of functional connection logic & real terminal aesthetics.
+          ==================================================================== */}
+      <section
+        id="connect"
+        className="border-b border-[var(--border-default)] px-4 sm:px-6 py-12 md:py-16 max-w-6xl mx-auto w-full space-y-6"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Interactive Console (Join / Host) */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-xl p-5 sm:p-6 shadow-sm space-y-5 transition-colors">
               {/* Segmented Mode Switcher */}
-              <div className="flex bg-[var(--bg-canvas)] p-1 rounded border border-[var(--border-default)]">
+              <div
+                className="flex bg-[var(--bg-canvas)] p-1 rounded-lg border border-[var(--border-default)]"
+                role="tablist"
+                aria-label="Session Mode"
+              >
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={activeConsoleTab === 'join'}
                   onClick={() => setActiveConsoleTab('join')}
-                  className={`flex-1 py-1.5 text-xs font-medium rounded transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+                  className={`flex-1 py-2 text-xs font-mono font-medium rounded-md transition flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] ${
                     activeConsoleTab === 'join'
-                      ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs font-semibold'
+                      ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-default)] shadow-xs font-semibold'
                       : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
                   }`}
                 >
-                  <Radio className="w-3.5 h-3.5" />
+                  <Radio className="w-3.5 h-3.5 text-[var(--accent)]" />
                   <span>Join Session</span>
                 </button>
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={activeConsoleTab === 'host'}
                   onClick={() => setActiveConsoleTab('host')}
-                  className={`flex-1 py-1.5 text-xs font-medium rounded transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+                  className={`flex-1 py-2 text-xs font-mono font-medium rounded-md transition flex items-center justify-center space-x-2 cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] ${
                     activeConsoleTab === 'host'
-                      ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs font-semibold'
+                      ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-default)] shadow-xs font-semibold'
                       : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
                   }`}
                 >
-                  <TerminalIcon className="w-3.5 h-3.5" />
+                  <TerminalIcon className="w-3.5 h-3.5 text-[var(--accent)]" />
                   <span>Host a Terminal</span>
                 </button>
               </div>
 
-              {/* Tab 1: Join Session */}
+              {/* Tab 1: Join Session Form */}
               {activeConsoleTab === 'join' ? (
-                <>
+                <div className="space-y-4">
                   <form onSubmit={onConnect} className="space-y-4">
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)] mb-2 font-mono">
-                        Pairing Code
-                      </label>
+                      <div className="flex items-center justify-between mb-2">
+                        <label
+                          htmlFor="pairing-input"
+                          className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[var(--text-muted)]"
+                        >
+                          Pairing Code
+                        </label>
+                        <span className="text-[10px] font-mono text-[var(--text-muted)]">
+                          8-character Crockford Base32
+                        </span>
+                      </div>
                       <div className="relative">
                         <input
+                          id="pairing-input"
                           type="text"
                           value={pairingCode}
                           onChange={(e) => setPairingCode(normalizePairingCode(e.target.value))}
                           placeholder="XXXX-XXXX"
                           maxLength={9}
                           autoFocus
-                          className="w-full h-12 bg-[var(--bg-canvas)] border border-[var(--border-default)] focus:border-[var(--border-focus)] rounded text-center text-xl font-mono tracking-widest text-[var(--text-primary)] focus:outline-none transition placeholder:text-[var(--text-muted)] uppercase"
+                          autoComplete="off"
+                          spellCheck={false}
+                          className="w-full h-12 bg-[var(--bg-canvas)] border border-[var(--border-default)] focus:border-[var(--border-focus)] rounded-lg text-center text-xl font-mono tracking-widest text-[var(--text-primary)] focus:outline-none transition placeholder:text-[var(--text-muted)] uppercase"
                         />
                         {pairingCode && (
                           <button
                             type="button"
                             onClick={() => setPairingCode('')}
-                            className="absolute right-3 top-3.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                            className="absolute right-3 top-3.5 text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer px-1 py-0.5 rounded"
                           >
                             Clear
                           </button>
@@ -194,23 +372,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <button
                       type="submit"
                       disabled={!isValidPairingCode(pairingCode)}
-                      className="w-full h-10 bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-[var(--bg-hover)] disabled:text-[var(--text-muted)] text-[var(--accent-contrast)] text-xs font-medium rounded transition flex items-center justify-center space-x-1.5 cursor-pointer disabled:cursor-not-allowed"
+                      className="w-full min-h-[44px] bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-[var(--bg-hover)] disabled:text-[var(--text-muted)] text-[var(--accent-contrast)] text-xs font-mono font-medium rounded-lg transition flex items-center justify-center space-x-2 cursor-pointer disabled:cursor-not-allowed shadow-xs active:translate-y-px"
                     >
                       <span>Connect to Host</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-4 h-4" />
                     </button>
                   </form>
 
                   {/* Recent Sessions */}
                   {recentCodes.length > 0 && (
-                    <div className="pt-3 border-t border-[var(--border-subtle)]">
-                      <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)] mb-2 font-mono">
+                    <div className="pt-3 border-t border-[var(--border-subtle)] space-y-2">
+                      <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)] font-mono">
                         <span>Recent Sessions</span>
                         <button
+                          type="button"
                           onClick={onClearRecentCodes}
                           className="hover:text-[var(--text-secondary)] transition cursor-pointer flex items-center space-x-1 text-[10px]"
                         >
-                          <Trash2 className="w-2.5 h-2.5" />
+                          <Trash2 className="w-3 h-3" />
                           <span>Clear</span>
                         </button>
                       </div>
@@ -218,11 +397,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         {recentCodes.map((code) => (
                           <button
                             key={code}
+                            type="button"
                             onClick={() => {
                               setPairingCode(code);
                               onConnect(undefined, code);
                             }}
-                            className="px-2.5 py-1 rounded bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] font-mono text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition cursor-pointer"
+                            className="px-2.5 py-1 rounded-md bg-[var(--bg-canvas)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] font-mono text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition cursor-pointer active:scale-95"
                           >
                             {code}
                           </button>
@@ -231,34 +411,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </div>
                   )}
 
-                  {/* Local Loopback Alternative */}
+                  {/* Local Loopback Option */}
                   <div className="pt-3 border-t border-[var(--border-subtle)]">
                     <button
                       type="button"
                       onClick={onConnectLocal}
-                      className="w-full h-9 bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium rounded transition flex items-center justify-center space-x-2 cursor-pointer font-mono"
+                      className="w-full min-h-[40px] bg-[var(--bg-canvas)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-mono rounded-lg transition flex items-center justify-center space-x-2 cursor-pointer active:translate-y-px"
                     >
                       <Laptop className="w-3.5 h-3.5 text-[var(--accent)]" />
                       <span>Connect to Local PTY (127.0.0.1:3000)</span>
                     </button>
                   </div>
-                </>
+                </div>
               ) : (
                 /* Tab 2: Host a Terminal */
                 <div className="space-y-4">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)] font-mono">
+                      <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                         1. Install Host Agent
                       </span>
-                      <div className="flex space-x-1">
+                      <div className="flex space-x-1 bg-[var(--bg-canvas)] p-0.5 rounded-md border border-[var(--border-default)]">
                         <button
                           type="button"
                           onClick={() => setInstallOs('windows')}
                           className={`px-2 py-0.5 text-[10px] rounded font-mono transition cursor-pointer ${
                             installOs === 'windows'
                               ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-medium'
-                              : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-[var(--bg-canvas)] border border-[var(--border-default)]'
+                              : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                           }`}
                         >
                           Windows
@@ -269,7 +449,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                           className={`px-2 py-0.5 text-[10px] rounded font-mono transition cursor-pointer ${
                             installOs === 'linux'
                               ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-medium'
-                              : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-[var(--bg-canvas)] border border-[var(--border-default)]'
+                              : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                           }`}
                         >
                           Linux
@@ -280,7 +460,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                           className={`px-2 py-0.5 text-[10px] rounded font-mono transition cursor-pointer ${
                             installOs === 'cargo'
                               ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-medium'
-                              : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-[var(--bg-canvas)] border border-[var(--border-default)]'
+                              : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                           }`}
                         >
                           Cargo
@@ -289,7 +469,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </div>
 
                     {/* Snippet Card */}
-                    <div className="relative bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded p-2.5 flex items-center justify-between">
+                    <div className="relative bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded-lg p-3 flex items-center justify-between">
                       <div className="overflow-x-auto text-left font-mono text-xs text-[var(--text-primary)] pr-8 py-0.5 scrollbar-thin">
                         {installOs === 'windows' && (
                           <code>irm https://raw.githubusercontent.com/reck98/Shellvyn/main/scripts/install-windows.ps1 | iex</code>
@@ -312,8 +492,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                               : 'cargo install --git https://github.com/reck98/Shellvyn shellvyn-agent';
                           onCopySnippet(cmd, 'install');
                         }}
-                        className="absolute right-2 top-2 p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition cursor-pointer bg-[var(--bg-surface)] border border-[var(--border-default)] rounded"
-                        title="Copy command"
+                        className="absolute right-2 top-2 p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition cursor-pointer bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md"
+                        title="Copy install command"
                       >
                         {copiedSnippet === 'install' ? (
                           <Check className="w-3.5 h-3.5 text-[var(--accent)]" />
@@ -325,17 +505,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </div>
 
                   <div>
-                    <span className="block text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)] mb-2 font-mono">
+                    <span className="block text-[11px] font-mono font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">
                       2. Share Your Shell
                     </span>
-                    <div className="relative bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded p-2.5 flex items-center justify-between">
+                    <div className="relative bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded-lg p-3 flex items-center justify-between">
                       <code className="font-mono text-xs text-[var(--accent)] font-semibold">
                         shellvyn share
                       </code>
                       <button
                         type="button"
                         onClick={() => onCopySnippet('shellvyn share', 'share')}
-                        className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition cursor-pointer bg-[var(--bg-surface)] border border-[var(--border-default)] rounded"
+                        className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition cursor-pointer bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md"
                         title="Copy command"
                       >
                         {copiedSnippet === 'share' ? (
@@ -346,21 +526,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       </button>
                     </div>
                     <p className="text-[11px] text-[var(--text-secondary)] mt-1.5 leading-relaxed">
-                      Generates a secure pairing code to share with remote collaborators.
+                      Launches your local PTY and registers an encrypted pairing code for your guest.
                     </p>
                   </div>
 
                   {/* Direct Downloads */}
                   <div className="pt-3 border-t border-[var(--border-subtle)] space-y-2">
-                    <span className="block text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)] font-mono">
-                      Manual Standalone Binaries
+                    <span className="block text-[11px] font-mono font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                      Standalone Binary Archives
                     </span>
                     <div className="grid grid-cols-2 gap-2">
                       <a
                         href="https://github.com/reck98/Shellvyn/releases/latest/download/shellvyn-windows-x86_64.zip"
                         target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center justify-center space-x-1.5 px-3 py-2 rounded bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-mono transition"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center space-x-1.5 px-3 py-2 rounded-lg bg-[var(--bg-canvas)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-mono transition"
                       >
                         <Download className="w-3 h-3 text-[var(--accent)]" />
                         <span>Windows (.exe)</span>
@@ -368,8 +548,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       <a
                         href="https://github.com/reck98/Shellvyn/releases/latest/download/shellvyn-linux-x86_64.tar.gz"
                         target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center justify-center space-x-1.5 px-3 py-2 rounded bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-mono transition"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center space-x-1.5 px-3 py-2 rounded-lg bg-[var(--bg-canvas)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-mono transition"
                       >
                         <Download className="w-3 h-3 text-[var(--accent)]" />
                         <span>Linux (x64)</span>
@@ -381,35 +561,35 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
           </div>
 
-          {/* Right Column: Live Terminal Session Preview */}
-          <div className="lg:col-span-6 space-y-3">
+          {/* Right Column: Live Terminal Session Demonstration */}
+          <div className="lg:col-span-7 space-y-3">
             <div className="flex items-center justify-between text-xs font-mono text-[var(--text-muted)]">
-              <span className="flex items-center space-x-1.5">
+              <span className="flex items-center space-x-2">
                 <span className="w-2 h-2 rounded-full bg-[var(--success)] pulse-active"></span>
-                <span>Active Terminal Stream</span>
+                <span className="text-[var(--text-secondary)] font-medium">Active Terminal Stream</span>
               </span>
-              <span>ConPTY (80x24)</span>
+              <span>Windows ConPTY / Linux PTY (80×24)</span>
             </div>
 
             {/* App Frame Terminal Mock */}
-            <div className="app-frame rounded-lg overflow-hidden border border-[var(--border-default)] shadow-lg">
+            <div className="app-frame rounded-xl overflow-hidden border border-[var(--border-default)] shadow-xl transition-all">
               {/* Window Titlebar */}
-              <div className="h-8 bg-[var(--bg-subtle)] border-b border-[var(--border-default)] px-3 flex items-center justify-between select-none">
+              <div className="h-9 bg-[var(--bg-subtle)] border-b border-[var(--border-default)] px-3.5 flex items-center justify-between select-none">
                 <div className="flex items-center space-x-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]/90 border border-black/10"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]/90 border border-black/10"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]/90 border border-black/10"></div>
                 </div>
-                <div className="text-[11px] font-mono text-[var(--text-secondary)]">
+                <div className="text-[11px] font-mono text-[var(--text-secondary)] font-medium">
                   shellvyn-host &bull; ~/projects/api
                 </div>
                 <div className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-default)]">
-                  E2EE
+                  E2EE &bull; ChaCha20
                 </div>
               </div>
 
-              {/* Terminal View Content */}
-              <div className="p-4 text-xs font-mono leading-relaxed space-y-2 text-[var(--term-fg)] overflow-x-auto min-h-[320px]">
+              {/* Terminal Screen Content */}
+              <div className="p-4 sm:p-5 text-[11.5px] sm:text-xs font-mono leading-relaxed space-y-2 text-[var(--term-fg)] overflow-x-auto min-h-[320px]">
                 <div>
                   <span className="text-[var(--gold)]">$</span> shellvyn share
                 </div>
@@ -420,7 +600,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   [Shellvyn] Derived 256-bit ChaCha20-Poly1305 session key
                 </div>
 
-                <div className="text-[var(--text-secondary)] py-1 border-y border-[var(--border-subtle)] my-2">
+                <div className="text-[var(--text-secondary)] py-1.5 border-y border-[var(--border-subtle)] my-2">
                   <div className="text-[var(--accent)] font-bold">╔══════════════════════════════════════════════════════════╗</div>
                   <div>║  PAIRING CODE : <span className="text-[var(--gold)] font-bold">K7M2-9XPQ</span>                                ║</div>
                   <div>║  BROWSER LINK : https://shellvyn.reck98.in/#K7M2-9XPQ   ║</div>
@@ -431,29 +611,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   [Shellvyn] Incoming connection from 198.51.100.42 (Chrome/macOS)
                 </div>
                 <div>
-                  <span className="text-[var(--gold)]">[Shellvyn] Approve connection? [y/N]:</span> <span className="text-[var(--accent)] font-bold">y</span>
+                  <span className="text-[var(--gold)]">[Shellvyn] Approve connection? [y/N]:</span>{' '}
+                  <span className="text-[var(--accent)] font-bold">y</span>
                 </div>
                 <div className="text-[var(--success)]">
                   [Shellvyn] Connection approved. Live interactive terminal streaming.
                 </div>
 
                 <div className="pt-2 text-[var(--term-fg)]">
-                  <span className="text-[var(--accent)]">guest@devbox</span>:<span className="text-[var(--gold)]">~/projects/api</span>$ cargo test --quiet
+                  <span className="text-[var(--accent)]">guest@devbox</span>:
+                  <span className="text-[var(--gold)]">~/projects/api</span>$ cargo test --quiet
                 </div>
                 <div className="text-[var(--text-secondary)]">
                   running 25 tests ... 25 passed; 0 failed; finished in 0.42s
                 </div>
                 <div className="text-[var(--term-fg)] flex items-center space-x-1">
-                  <span><span className="text-[var(--accent)]">guest@devbox</span>:<span className="text-[var(--gold)]">~/projects/api</span>$</span>
+                  <span>
+                    <span className="text-[var(--accent)]">guest@devbox</span>:
+                    <span className="text-[var(--gold)]">~/projects/api</span>$
+                  </span>
                   <span className="terminal-cursor"></span>
                 </div>
               </div>
 
               {/* Statusbar */}
-              <div className="h-6 bg-[var(--bg-subtle)] border-t border-[var(--border-default)] px-3 flex items-center justify-between text-[10px] font-mono text-[var(--text-muted)]">
+              <div className="h-7 bg-[var(--bg-subtle)] border-t border-[var(--border-default)] px-3.5 flex items-center justify-between text-[10px] font-mono text-[var(--text-muted)] select-none">
                 <div className="flex items-center space-x-2">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--success)]"></span>
-                  <span>Relay Channel Active</span>
+                  <span>Relay Channel Active (shellvyn-signaling.onrender.com)</span>
                 </div>
                 <div>ChaCha20-Poly1305 &bull; 14ms latency</div>
               </div>
@@ -462,29 +647,122 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* 3. Architecture & Security Section */}
-      <section id="architecture" className="border-b border-[var(--border-default)] px-6 py-16 max-w-6xl mx-auto w-full space-y-10">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-[var(--bg-surface)] border border-[var(--border-default)] text-[11px] font-mono text-[var(--text-secondary)]">
-            <Layers className="w-3.5 h-3.5 text-[var(--accent)]" />
-            <span>Cryptographic Pipeline</span>
+      {/* ====================================================================
+          4. Features Section
+          Accurate, meaningful capabilities without repetitive card bloat.
+          ==================================================================== */}
+      <section
+        id="features"
+        className="border-b border-[var(--border-default)] px-4 sm:px-6 py-14 md:py-20 max-w-6xl mx-auto w-full space-y-10"
+      >
+        <div className="max-w-2xl space-y-2">
+          <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-md bg-[var(--bg-surface)] border border-[var(--border-default)] text-[11px] font-mono text-[var(--text-secondary)]">
+            <Cpu className="w-3.5 h-3.5 text-[var(--accent)]" />
+            <span>CORE CAPABILITIES</span>
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+            Engineered for Developer Precision
+          </h2>
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+            Built in Rust for native speed, zero latency overhead, and endpoint privacy.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-xl p-5 space-y-2.5 transition-colors hover:border-[var(--border-focus)]/60">
+            <div className="flex items-center space-x-2.5 text-[var(--text-primary)] font-semibold text-sm">
+              <Cpu className="w-4 h-4 text-[var(--accent)] shrink-0" />
+              <span>True OS ConPTY Integration</span>
+            </div>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              Not a synthetic browser terminal emulator. Directly launches PowerShell, Command Prompt, or Bash with authentic operating system process encapsulation.
+            </p>
+          </div>
+
+          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-xl p-5 space-y-2.5 transition-colors hover:border-[var(--border-focus)]/60">
+            <div className="flex items-center space-x-2.5 text-[var(--text-primary)] font-semibold text-sm">
+              <Lock className="w-4 h-4 text-[var(--accent)] shrink-0" />
+              <span>Host-Controlled Authorization</span>
+            </div>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              Hosts receive explicit [y/N] interactive terminal prompts showing remote IP and client agent before granting terminal access, preventing rogue attachments.
+            </p>
+          </div>
+
+          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-xl p-5 space-y-2.5 transition-colors hover:border-[var(--border-focus)]/60">
+            <div className="flex items-center space-x-2.5 text-[var(--text-primary)] font-semibold text-sm">
+              <Activity className="w-4 h-4 text-[var(--accent)] shrink-0" />
+              <span>Zero Firewall Configuration</span>
+            </div>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              Outbound TLS WebSocket connections traverse strict NATs, VPNs, and corporate firewalls without configuring port-forwarding or public IP addresses.
+            </p>
+          </div>
+
+          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-xl p-5 space-y-2.5 transition-colors hover:border-[var(--border-focus)]/60">
+            <div className="flex items-center space-x-2.5 text-[var(--text-primary)] font-semibold text-sm">
+              <ShieldCheck className="w-4 h-4 text-[var(--accent)] shrink-0" />
+              <span>Read-Only Sharing Mode</span>
+            </div>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              Start sessions with <code className="px-1 py-0.5 rounded bg-[var(--bg-canvas)] border border-[var(--border-default)] font-mono text-[11px]">--read-only</code> to allow guests to observe live output while completely restricting keystroke transmission.
+            </p>
+          </div>
+
+          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-xl p-5 space-y-2.5 transition-colors hover:border-[var(--border-focus)]/60">
+            <div className="flex items-center space-x-2.5 text-[var(--text-primary)] font-semibold text-sm">
+              <KeyRound className="w-4 h-4 text-[var(--accent)] shrink-0" />
+              <span>Brute Force Rate Limiter</span>
+            </div>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              The signaling relay enforces a 15-minute IP lockout after 5 invalid pairing attempts, securing the 40-bit Crockford Base32 pairing code entropy space.
+            </p>
+          </div>
+
+          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-xl p-5 space-y-2.5 transition-colors hover:border-[var(--border-focus)]/60">
+            <div className="flex items-center space-x-2.5 text-[var(--text-primary)] font-semibold text-sm">
+              <CheckCircle2 className="w-4 h-4 text-[var(--accent)] shrink-0" />
+              <span>Zero Guest Software</span>
+            </div>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              Collaborators only need a modern web browser. High-performance VT100/ANSI rendering, resize sync, and 256-color palette powered by xterm.js.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ====================================================================
+          5. Architecture Section
+          Accurate Representation: Encrypted WebSocket Relay Architecture
+          (Zero-knowledge forwarder; WebRTC direct P2P is planned future).
+          ==================================================================== */}
+      <section
+        id="architecture"
+        className="border-b border-[var(--border-default)] px-4 sm:px-6 py-14 md:py-20 max-w-6xl mx-auto w-full space-y-10"
+      >
+        <div className="max-w-2xl space-y-2">
+          <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-md bg-[var(--bg-surface)] border border-[var(--border-default)] text-[11px] font-mono text-[var(--text-secondary)]">
+            <Layers className="w-3.5 h-3.5 text-[var(--accent)]" />
+            <span>CRYPTOGRAPHIC PIPELINE</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
             Zero-Knowledge Architecture
           </h2>
-          <p className="text-xs md:text-sm text-[var(--text-secondary)] leading-relaxed">
-            The signaling relay acts purely as a blinded forwarder. Raw terminal byte streams and keystrokes are encrypted with symmetric keys derived exclusively on endpoints.
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+            The signaling relay operates strictly as a blinded forwarder. Raw terminal byte streams and keystrokes are symmetrically encrypted with keys derived exclusively on endpoints.
           </p>
         </div>
 
         {/* 3-Stage Pipeline Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-lg p-5 space-y-3">
-            <div className="w-8 h-8 rounded bg-[var(--bg-canvas)] border border-[var(--border-default)] flex items-center justify-center text-[var(--accent)]">
+          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-xl p-5 sm:p-6 space-y-3">
+            <div className="w-9 h-9 rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-default)] flex items-center justify-center text-[var(--accent)]">
               <Laptop className="w-4 h-4" />
             </div>
             <div className="space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">Stage 1</span>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                Stage 1 &bull; Local Endpoint
+              </span>
               <h3 className="text-sm font-semibold text-[var(--text-primary)]">Native Host PTY</h3>
             </div>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
@@ -492,210 +770,210 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
           </div>
 
-          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-lg p-5 space-y-3">
-            <div className="w-8 h-8 rounded bg-[var(--bg-canvas)] border border-[var(--border-default)] flex items-center justify-center text-[var(--accent)]">
+          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-xl p-5 sm:p-6 space-y-3">
+            <div className="w-9 h-9 rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-default)] flex items-center justify-center text-[var(--accent)]">
               <Radio className="w-4 h-4" />
             </div>
             <div className="space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">Stage 2</span>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                Stage 2 &bull; Cloud Relay
+              </span>
               <h3 className="text-sm font-semibold text-[var(--text-primary)]">Blinded Relay Server</h3>
             </div>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              Stateless high-concurrency Rust Axum service. Relays encrypted Base64 frames between endpoints via in-memory DashMap. Possesses no ability to inspect terminal contents.
+              Stateless high-concurrency Rust Axum service on Render. Relays encrypted Base64 frames via in-memory DashMap. Operates on a zero-knowledge basis with no decryption keys.
             </p>
           </div>
 
-          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-lg p-5 space-y-3">
-            <div className="w-8 h-8 rounded bg-[var(--bg-canvas)] border border-[var(--border-default)] flex items-center justify-center text-[var(--accent)]">
+          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-xl p-5 sm:p-6 space-y-3">
+            <div className="w-9 h-9 rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-default)] flex items-center justify-center text-[var(--accent)]">
               <TerminalIcon className="w-4 h-4" />
             </div>
             <div className="space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">Stage 3</span>
-              <h3 className="text-sm font-semibold text-[var(--text-primary)]">Browser Guest (xterm.js)</h3>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                Stage 3 &bull; Browser Guest
+              </span>
+              <h3 className="text-sm font-semibold text-[var(--text-primary)]">xterm.js Web Client</h3>
             </div>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              Decrypts frames in the browser using the derived symmetric key. Renders native VT100/ANSI sequences with full 256-color support and GPU-accelerated canvas.
+              Decrypts frames in the browser using the endpoint-derived symmetric key. Renders native ANSI/VT100 sequences with GPU-accelerated canvas on shellvyn.reck98.in.
             </p>
           </div>
         </div>
       </section>
 
-      {/* 4. Features & Engineering Differentiators */}
-      <section id="features" className="border-b border-[var(--border-default)] px-6 py-16 max-w-6xl mx-auto w-full space-y-10">
-        <div className="text-center max-w-xl mx-auto space-y-2">
-          <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-[var(--bg-surface)] border border-[var(--border-default)] text-[11px] font-mono text-[var(--text-secondary)]">
-            <Zap className="w-3.5 h-3.5 text-[var(--accent)]" />
-            <span>Developer-First Infrastructure</span>
-          </div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
-            Engineered for Precision & Speed
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-lg p-5 space-y-2.5">
-            <div className="flex items-center space-x-2 text-[var(--text-primary)] font-semibold text-sm">
-              <Cpu className="w-4 h-4 text-[var(--accent)]" />
-              <span>True OS ConPTY Integration</span>
-            </div>
-            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              Not a synthetic browser terminal emulator. Directly launches PowerShell, Command Prompt, or Bash with genuine operating system process encapsulation.
-            </p>
-          </div>
-
-          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-lg p-5 space-y-2.5">
-            <div className="flex items-center space-x-2 text-[var(--text-primary)] font-semibold text-sm">
-              <Lock className="w-4 h-4 text-[var(--accent)]" />
-              <span>Host Authorization Prompts</span>
-            </div>
-            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              Hosts receive explicit [y/N] interactive terminal prompts showing remote IP and client agent before granting terminal access, preventing rogue attachments.
-            </p>
-          </div>
-
-          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-lg p-5 space-y-2.5">
-            <div className="flex items-center space-x-2 text-[var(--text-primary)] font-semibold text-sm">
-              <Activity className="w-4 h-4 text-[var(--accent)]" />
-              <span>Zero Firewall Configuration</span>
-            </div>
-            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              Outbound WebSocket connections traverse strict NATs, VPNs, and corporate firewalls without configuring port-forwarding or public IP addresses.
-            </p>
-          </div>
-
-          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-lg p-5 space-y-2.5">
-            <div className="flex items-center space-x-2 text-[var(--text-primary)] font-semibold text-sm">
-              <ShieldCheck className="w-4 h-4 text-[var(--accent)]" />
-              <span>Read-Only Sharing Mode</span>
-            </div>
-            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              Start sessions with <code className="px-1 py-0.5 rounded bg-[var(--bg-canvas)] border border-[var(--border-default)] font-mono text-[11px]">--read-only</code> to allow guests to watch real-time output while restricting keystroke transmission.
-            </p>
-          </div>
-
-          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-lg p-5 space-y-2.5">
-            <div className="flex items-center space-x-2 text-[var(--text-primary)] font-semibold text-sm">
-              <KeyRound className="w-4 h-4 text-[var(--accent)]" />
-              <span>Rate-Limited Brute Force Guard</span>
-            </div>
-            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              The signaling relay enforces a 15-minute IP lockout after 5 invalid pairing attempts, securing the 40-bit Crockford Base32 pairing code entropy space.
-            </p>
-          </div>
-
-          <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-lg p-5 space-y-2.5">
-            <div className="flex items-center space-x-2 text-[var(--text-primary)] font-semibold text-sm">
-              <CheckCircle2 className="w-4 h-4 text-[var(--accent)]" />
-              <span>Standalone Portable Binary</span>
-            </div>
-            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              Compiled in Rust as a compact standalone executable with zero runtime dependencies. Drop it on any machine and execute immediately.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. CLI Command Reference */}
-      <section id="cli" className="border-b border-[var(--border-default)] px-6 py-16 max-w-6xl mx-auto w-full space-y-8">
-        <div className="text-center max-w-xl mx-auto space-y-2">
-          <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-[var(--bg-surface)] border border-[var(--border-default)] text-[11px] font-mono text-[var(--text-secondary)]">
+      {/* ====================================================================
+          6. CLI Reference Section
+          Authentic command-line flags and syntax matching repository implementation.
+          ==================================================================== */}
+      <section
+        id="cli"
+        className="border-b border-[var(--border-default)] px-4 sm:px-6 py-14 md:py-20 max-w-6xl mx-auto w-full space-y-8"
+      >
+        <div className="max-w-2xl space-y-2">
+          <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-md bg-[var(--bg-surface)] border border-[var(--border-default)] text-[11px] font-mono text-[var(--text-secondary)]">
             <TerminalIcon className="w-3.5 h-3.5 text-[var(--accent)]" />
-            <span>Developer Reference</span>
+            <span>COMMAND-LINE INTERFACE</span>
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
             CLI Commands
           </h2>
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+            A single self-contained binary written in Rust. No Python, Node.js, or external runtimes required.
+          </p>
         </div>
 
-        <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-lg overflow-hidden divide-y divide-[var(--border-subtle)]">
-          <div className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-xl overflow-hidden divide-y divide-[var(--border-subtle)] shadow-xs">
+          <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
               <code className="text-xs font-mono font-bold text-[var(--accent)]">shellvyn share</code>
-              <p className="text-xs text-[var(--text-secondary)]">Start an encrypted terminal sharing session through the default signaling server.</p>
+              <p className="text-xs text-[var(--text-secondary)]">
+                Start an encrypted terminal sharing session through the default signaling server.
+              </p>
             </div>
             <button
               type="button"
-              onClick={() => onCopySnippet('shellvyn share', 'cmd1')}
-              className="px-2.5 py-1 rounded bg-[var(--bg-canvas)] border border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex items-center space-x-1.5 self-start md:self-auto cursor-pointer"
+              onClick={() => onCopySnippet('shellvyn share', 'cli1')}
+              className="px-3 py-1.5 rounded-md bg-[var(--bg-canvas)] border border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex items-center space-x-1.5 self-start sm:self-auto cursor-pointer"
             >
-              {copiedSnippet === 'cmd1' ? <Check className="w-3 h-3 text-[var(--accent)]" /> : <Copy className="w-3 h-3" />}
-              <span>{copiedSnippet === 'cmd1' ? 'Copied' : 'Copy'}</span>
+              {copiedSnippet === 'cli1' ? (
+                <Check className="w-3.5 h-3.5 text-[var(--accent)]" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
+              <span>{copiedSnippet === 'cli1' ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
 
-          <div className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
-              <code className="text-xs font-mono font-bold text-[var(--accent)]">shellvyn share --read-only</code>
-              <p className="text-xs text-[var(--text-secondary)]">Start in observation mode. Remote viewers cannot transmit keystrokes or resize the shell.</p>
+              <code className="text-xs font-mono font-bold text-[var(--accent)]">
+                shellvyn share --read-only
+              </code>
+              <p className="text-xs text-[var(--text-secondary)]">
+                Start in observation mode. Remote viewers cannot transmit keystrokes or resize the shell.
+              </p>
             </div>
             <button
               type="button"
-              onClick={() => onCopySnippet('shellvyn share --read-only', 'cmd2')}
-              className="px-2.5 py-1 rounded bg-[var(--bg-canvas)] border border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex items-center space-x-1.5 self-start md:self-auto cursor-pointer"
+              onClick={() => onCopySnippet('shellvyn share --read-only', 'cli2')}
+              className="px-3 py-1.5 rounded-md bg-[var(--bg-canvas)] border border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex items-center space-x-1.5 self-start sm:self-auto cursor-pointer"
             >
-              {copiedSnippet === 'cmd2' ? <Check className="w-3 h-3 text-[var(--accent)]" /> : <Copy className="w-3 h-3" />}
-              <span>{copiedSnippet === 'cmd2' ? 'Copied' : 'Copy'}</span>
+              {copiedSnippet === 'cli2' ? (
+                <Check className="w-3.5 h-3.5 text-[var(--accent)]" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
+              <span>{copiedSnippet === 'cli2' ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
 
-          <div className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
-              <code className="text-xs font-mono font-bold text-[var(--accent)]">shellvyn local --port 3000</code>
-              <p className="text-xs text-[var(--text-secondary)]">Launch an embedded local HTTP/WebSocket loopback server for single-machine testing.</p>
+              <code className="text-xs font-mono font-bold text-[var(--accent)]">
+                shellvyn local --port 3000
+              </code>
+              <p className="text-xs text-[var(--text-secondary)]">
+                Launch an embedded local HTTP/WebSocket loopback server for single-machine testing.
+              </p>
             </div>
             <button
               type="button"
-              onClick={() => onCopySnippet('shellvyn local --port 3000', 'cmd3')}
-              className="px-2.5 py-1 rounded bg-[var(--bg-canvas)] border border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex items-center space-x-1.5 self-start md:self-auto cursor-pointer"
+              onClick={() => onCopySnippet('shellvyn local --port 3000', 'cli3')}
+              className="px-3 py-1.5 rounded-md bg-[var(--bg-canvas)] border border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex items-center space-x-1.5 self-start sm:self-auto cursor-pointer"
             >
-              {copiedSnippet === 'cmd3' ? <Check className="w-3 h-3 text-[var(--accent)]" /> : <Copy className="w-3 h-3" />}
-              <span>{copiedSnippet === 'cmd3' ? 'Copied' : 'Copy'}</span>
+              {copiedSnippet === 'cli3' ? (
+                <Check className="w-3.5 h-3.5 text-[var(--accent)]" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
+              <span>{copiedSnippet === 'cli3' ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
 
-          <div className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
-              <code className="text-xs font-mono font-bold text-[var(--accent)]">shellvyn test-pty</code>
-              <p className="text-xs text-[var(--text-secondary)]">Run automated diagnostics verifying ConPTY/POSIX terminal spawning and I/O loopback.</p>
+              <code className="text-xs font-mono font-bold text-[var(--accent)]">
+                shellvyn test-pty
+              </code>
+              <p className="text-xs text-[var(--text-secondary)]">
+                Run automated diagnostics verifying ConPTY/POSIX terminal spawning and I/O loopback.
+              </p>
             </div>
             <button
               type="button"
-              onClick={() => onCopySnippet('shellvyn test-pty', 'cmd4')}
-              className="px-2.5 py-1 rounded bg-[var(--bg-canvas)] border border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex items-center space-x-1.5 self-start md:self-auto cursor-pointer"
+              onClick={() => onCopySnippet('shellvyn test-pty', 'cli4')}
+              className="px-3 py-1.5 rounded-md bg-[var(--bg-canvas)] border border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex items-center space-x-1.5 self-start sm:self-auto cursor-pointer"
             >
-              {copiedSnippet === 'cmd4' ? <Check className="w-3 h-3 text-[var(--accent)]" /> : <Copy className="w-3 h-3" />}
-              <span>{copiedSnippet === 'cmd4' ? 'Copied' : 'Copy'}</span>
+              {copiedSnippet === 'cli4' ? (
+                <Check className="w-3.5 h-3.5 text-[var(--accent)]" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
+              <span>{copiedSnippet === 'cli4' ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
         </div>
       </section>
 
-      {/* 6. Footer */}
-      <footer className="px-6 py-10 max-w-6xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-[var(--text-muted)] gap-4">
-        <div className="flex items-center space-x-2">
-          <span className="font-bold text-[var(--text-secondary)]">SHELLVYN</span>
-          <span>&bull;</span>
-          <span>Dual-licensed under MIT and Apache-2.0</span>
-        </div>
-        <div className="flex items-center space-x-4">
-          <a
-            href="https://github.com/reck98/Shellvyn"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-[var(--text-primary)] transition flex items-center space-x-1"
-          >
-            <span>GitHub Repository</span>
-            <ExternalLink className="w-3 h-3" />
-          </a>
-          <span>&bull;</span>
-          <a
-            href="https://github.com/reck98/Shellvyn/releases"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-[var(--text-primary)] transition"
-          >
-            Releases
-          </a>
+      {/* ====================================================================
+          7. Footer — Strict Requirements
+          Contains:
+          1. Exact text: "Made with ❤️ by reck98" linking to https://github.com/reck98
+          2. GitHub repository link and icon pointing to https://github.com/reck98/Shellvyn
+          3. Clean, restrained, single/two-row developer footer.
+          ==================================================================== */}
+      <footer className="mt-auto border-t border-[var(--border-default)] bg-[var(--bg-subtle)]/50 transition-colors">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs font-mono text-[var(--text-muted)]">
+          {/* Brand & Creator Credit */}
+          <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 text-center sm:text-left">
+            <div className="flex items-center space-x-2">
+              <ShellvynSymbol className="w-4 h-4 shrink-0" />
+              <span className="font-bold text-[var(--text-primary)]">Shellvyn</span>
+            </div>
+            <span className="hidden sm:inline text-[var(--border-default)]">&bull;</span>
+            <span className="text-[var(--text-secondary)]">
+              Made with ❤️ by{' '}
+              <a
+                href="https://github.com/reck98"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--text-primary)] font-medium hover:underline hover:text-[var(--accent)] focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] rounded transition-colors"
+              >
+                reck98
+              </a>
+            </span>
+          </div>
+
+          {/* GitHub Repository Link & Licensing */}
+          <div className="flex items-center space-x-4">
+            <a
+              href="https://github.com/reck98/Shellvyn"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Shellvyn GitHub repository"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-md border border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] active:scale-95"
+            >
+              <GithubIcon className="w-3.5 h-3.5" />
+              <span>GitHub</span>
+              <ExternalLink className="w-3 h-3 text-[var(--text-muted)]" />
+            </a>
+
+            <span className="text-[var(--border-default)]">&bull;</span>
+
+            <a
+              href="https://github.com/reck98/Shellvyn/releases"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-[var(--text-primary)] transition focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] rounded"
+            >
+              Releases
+            </a>
+
+            <span className="text-[var(--border-default)]">&bull;</span>
+
+            <span className="hidden md:inline">MIT OR Apache-2.0</span>
+          </div>
         </div>
       </footer>
     </div>

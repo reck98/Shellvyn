@@ -389,7 +389,7 @@ Status: Session registered. Waiting for incoming viewer connection...
 
 #### Step C: Connect from the Web Client
 1. Start the web frontend development server (`cd web && npm run dev`) or host the static build in `web/dist/`.
-2. Open `http://localhost:5173` in any modern web browser.
+2. Open `https://shellvyn.reck98.in` (or `http://localhost:5173` for local development) in any modern web browser.
 3. Enter the 8-character pairing code (e.g., `KV7M-9X2P`).
 4. Click **Connect to Host**.
 5. Once connected, your browser terminal streams encrypted keystrokes and ANSI output in real time!
@@ -408,7 +408,7 @@ For offline presentations, testing terminal emulators, or local debugging, the h
 ```bash
 ./target/release/shellvyn-agent local --port 3000
 ```
-Then open `http://localhost:5173`, click **Direct Local Loopback**, and interact directly with your local machine's PTY without any signaling server.
+Then open `https://shellvyn.reck98.in` (or `http://localhost:5173`), click **Connect to Local PTY (127.0.0.1:3000)**, and interact directly with your local machine's PTY without any signaling server.
 
 ---
 

@@ -68,7 +68,11 @@ export const App: React.FC = () => {
   const terminalRef = useRef<Terminal | null>(null);
   const sessionKeyRef = useRef<Uint8Array | null>(null);
   const hostIdRef = useRef<string | null>(null);
-  const clientIdRef = useRef<string>(`viewer-${Math.random().toString(36).substring(2, 9)}`);
+  const clientIdRef = useRef<string>('viewer-client');
+
+  useEffect(() => {
+    clientIdRef.current = `viewer-${Math.random().toString(36).substring(2, 9)}`;
+  }, []);
 
   // Apply theme to document
   useEffect(() => {
@@ -318,7 +322,7 @@ export const App: React.FC = () => {
 
   if (connState === 'idle') {
     return (
-      <div className="w-screen h-screen overflow-y-auto bg-[var(--bg-canvas)] text-[var(--text-primary)] font-sans">
+      <div className="w-full min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] font-sans">
         <LandingPage
           pairingCode={pairingCode}
           setPairingCode={setPairingCode}
@@ -342,7 +346,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col w-screen h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] overflow-hidden font-sans select-none">
+    <div className="flex flex-col w-full h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] overflow-hidden font-sans select-none">
       {/* 1. Header Navigation Bar (Restrained, 44px) */}
       <header className="h-11 border-b border-[var(--border-default)] bg-[var(--bg-subtle)] px-4 flex items-center justify-between shrink-0 z-20">
         <div className="flex items-center space-x-3">
