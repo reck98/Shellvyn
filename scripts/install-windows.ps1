@@ -53,8 +53,8 @@ if ($DownloadSuccess) {
     Remove-Item -Force $ZipPath
 } else {
     # Fallback to local release build or cargo build if in source repo
-    $LocalRelease = Join-Path $PSScriptRoot "..\target\release\shellvyn-agent.exe"
-    if (Test-Path $LocalRelease) {
+    $LocalRelease = if ($PSScriptRoot) { Join-Path $PSScriptRoot "..\target\release\shellvyn-agent.exe" } else { $null }
+    if ($LocalRelease -and (Test-Path $LocalRelease)) {
         Write-Host "==> Installing from local cargo target build..." -ForegroundColor Cyan
         Copy-Item -Path $LocalRelease -Destination $TargetPath -Force
     } elseif (Get-Command cargo -ErrorAction SilentlyContinue) {
