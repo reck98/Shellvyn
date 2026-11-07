@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shellvyn Architecture &amp; System Flow — Technical Dossier</title>
+  <meta name="description" content="Complete collection of 14 interactive architecture diagrams reverse-engineered from Shellvyn source code with Archify: ConPTY/openpty engine, Rust CLI agent, Axum stateless signaling relay on Render, and React 19 xterm.js browser client.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root[data-theme="dark"] {
+      --bg-canvas: #0D1109;
+      --bg-surface: #141A0E;
+      --bg-subtle: #1C2415;
+      --bg-hover: #232D1B;
+      --border-default: #2A3620;
+      --border-focus: #5A6D38;
+      --text-primary: #F0ECE1;
+      --text-secondary: #B4BFA4;
+      --text-muted: #6B785C;
+      --accent: #789048;
+      --accent-hover: #8AA653;
+      --accent-contrast: #0D1109;
+      --gold: #D4A346;
+      --card-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    :root[data-theme="light"] {
+      --bg-canvas: #F5EFE3;
+      --bg-surface: #FCFAF5;
+      --bg-subtle: #EBE3D3;
+      --bg-hover: #E2D8C3;
+      --border-default: #D8C9A8;
+      --border-focus: #8C7A52;
+      --text-primary: #1C2014;
+      --text-secondary: #485235;
+      --text-muted: #7A8466;
+      --accent: #4F5B2A;
+      --accent-hover: #3D4720;
+      --accent-contrast: #FCFAF5;
+      --gold: #B8892D;
+      --card-shadow: 0 4px 20px rgba(79,91,42,0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    a { color: inherit; text-decoration: none; }
+    
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      height: 56px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background-color: rgba(var(--bg-canvas), 0.9);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+    }
+    .header-content {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      border: 1px solid var(--border-default);
+      background-color: var(--bg-surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--border-focus);
+    }
+    .btn-primary {
+      background-color: var(--accent);
+      color: var(--accent-contrast);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+      color: var(--accent-contrast);
+    }
+    .btn-pill {
+      border-radius: 9999px;
+      padding: 0.65rem 1.25rem;
+    }
+
+    .hero {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-default);
+      padding: 3.5rem 1.5rem;
+    }
+    .hero-content {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-default);
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--accent);
+    }
+    h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .subtitle {
+      max-width: 720px;
+      font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+      color: var(--text-secondary);
+      margin-bottom: 1.75rem;
+      line-height: 1.6;
+    }
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.65rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      background-color: var(--bg-canvas);
+      border: 1px solid var(--border-default);
+      color: var(--text-secondary);
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 56px;
+      z-index: 30;
+      background-color: var(--bg-canvas);
+      border-bottom: 1px solid var(--border-default);
+      padding: 1rem 1.5rem;
+    }
+    .toolbar-content {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    @media (min-width: 768px) {
+      .toolbar-content {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+    .filter-pills {
+      display: flex;
+      gap: 0.4rem;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+      scrollbar-width: none;
+    }
+    .filter-pills::-webkit-scrollbar { display: none; }
+    .filter-pill {
+      white-space: nowrap;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      border: 1px solid var(--border-default);
+      background-color: var(--bg-surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .filter-pill:hover {
+      border-color: var(--border-focus);
+      color: var(--text-primary);
+    }
+    .filter-pill.active {
+      background-color: var(--accent);
+      color: var(--accent-contrast);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .search-box {
+      position: relative;
+      min-width: 260px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.45rem 0.75rem 0.45rem 2rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      border: 1px solid var(--border-default);
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--border-focus); }
+    .search-icon {
+      position: absolute;
+      left: 0.65rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      opacity: 0.5;
+    }
+
+    .main-grid {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.75rem;
+      flex: 1;
+    }
+    @media (max-width: 420px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      border-radius: 12px;
+      border: 1px solid var(--border-default);
+      background-color: var(--bg-surface);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      box-shadow: var(--card-shadow);
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-focus);
+    }
+    .card-thumb {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      background-color: var(--bg-canvas);
+      border-bottom: 1px solid var(--border-default);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      transition: transform 0.3s ease;
+    }
+    .card:hover .card-thumb img {
+      transform: scale(1.02);
+    }
+    .card-type-tag {
+      position: absolute;
+      top: 0.65rem;
+      right: 0.65rem;
+      font-size: 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background-color: rgba(var(--bg-canvas), 0.9);
+      border: 1px solid var(--border-default);
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .card-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .card-cat {
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+    .card-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-footer {
+      border-top: 1px solid rgba(var(--border-default), 0.5);
+      padding-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .card-tag {
+      font-size: 0.68rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      background-color: var(--bg-canvas);
+      border: 1px solid var(--border-default);
+      color: var(--text-muted);
+    }
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .card-actions .btn { flex: 1; }
+
+    footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border-default);
+      background-color: var(--bg-subtle);
+      padding: 3rem 1.5rem;
+      text-align: center;
+    }
+    .footer-content {
+      max-width: 1024px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .footer-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header>
+    <div class="header-content">
+      <div style="display: flex; align-items: center; gap: 0.85rem;">
+        <a href="/" class="btn" title="Return to Shellvyn Terminal Landing">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          <span>Return to Terminal</span>
+        </a>
+        <div style="width: 1px; height: 16px; background: var(--border-default);"></div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <svg viewBox="0 0 48 48" width="22" height="22" fill="none">
+            <path d="M 35 12 H 19 L 12 19 V 21 L 17.5 26.5 H 23" stroke="currentColor" stroke-width="4.25" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M 13 36 H 29 L 36 29 V 27 L 30.5 21.5 H 25" stroke="currentColor" stroke-width="4.25" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="21.5" y="21.5" width="5" height="5" rx="1" fill="var(--gold)"/>
+          </svg>
+          <span style="font-weight: 700; font-size: 0.9rem; letter-spacing: -0.02em;">Shellvyn</span>
+          <span class="mono" style="font-size: 0.72rem; color: var(--text-muted); padding: 0.1rem 0.4rem; border-radius: 4px; border: 1px solid var(--border-default);">architecture</span>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 0.65rem;">
+        <span class="mono" style="font-size: 0.7rem; color: var(--accent); padding: 0.25rem 0.6rem; border-radius: 4px; border: 1px solid var(--border-default); background: var(--bg-surface);">
+          14 Verified Diagrams
+        </span>
+        <button id="themeToggleBtn" class="btn" style="padding: 0.4rem 0.6rem;" aria-label="Toggle theme">
+          <svg id="themeIconSun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Dossier Banner -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        <span>TECHNICAL ARCHITECTURE DOSSIER</span>
+      </div>
+      <h1>Shellvyn Architecture &amp; System Flow</h1>
+      <p class="subtitle">
+        Complete collection of interactive architecture diagrams reverse-engineered from Shellvyn source code.
+        Every diagram is built with the <strong>Archify skill</strong>, providing standalone zoomable HTML with light/dark synchronization, motion tracing, and high-resolution export sidecars.
+      </p>
+      <div class="badges">
+        <div class="badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>ChaCha20-Poly1305 E2EE</span>
+        </div>
+        <div class="badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <span>ConPTY &amp; POSIX</span>
+        </div>
+        <div class="badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+          <span>Rust Axum Relay on Render</span>
+        </div>
+        <div class="badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+          <span>WebGL xterm.js Canvas</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sticky Filter & Search Toolbar -->
+  <section class="toolbar">
+    <div class="toolbar-content">
+      <div class="filter-pills" id="categoryPills">
+        <button class="filter-pill active" data-category="All">All (14)</button>
+      </div>
+
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" class="search-input mono" placeholder="Search diagrams, components...">
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Grid -->
+  <main class="main-grid" id="diagramsGrid">
+    <!-- Populated by JavaScript -->
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-pills">
+        <a href="/" class="btn btn-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          <span>Return to Shellvyn Terminal</span>
+        </a>
+        <a href="https://github.com/reck98/Shellvyn" target="_blank" rel="noopener noreferrer" class="btn btn-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          <span>GitHub Repository</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h10v10M7 17 17 7"/></svg>
+        </a>
+      </div>
+
+      <div style="font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); space-y: 0.5rem;">
+        <p>Made with ❤️ by <a href="https://github.com/reck98" target="_blank" rel="noopener noreferrer" style="color: var(--text-primary); font-weight: 600; text-decoration: underline;">reck98</a></p>
+        <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem;">Shellvyn Technical Architecture &bull; Generated with Archify &bull; Dual-licensed under MIT and Apache-2.0</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const DIAGRAMS = [
+  {
+    "slug": "system-architecture",
+    "title": "Complete System Architecture",
+    "category": "System Overview",
+    "type": "architecture",
+    "description": "End-to-end zero-knowledge architecture spanning native Host PTY, Rust CLI agent, Axum stateless signaling relay on Render, and React 19 xterm.js browser client with ChaCha20-Poly1305 encryption.",
+    "tags": [
+      "Rust",
+      "ConPTY",
+      "POSIX",
+      "Axum",
+      "ChaCha20-Poly1305",
+      "xterm.js",
+      "Render"
+    ],
+    "htmlUrl": "/architecture/diagrams/system-architecture.html",
+    "pngUrl": "/architecture/diagrams/system-architecture.png",
+    "previewUrl": "/architecture/diagrams/system-architecture.png",
+    "darkPngUrl": "/architecture/diagrams/system-architecture.dark.png",
+    "lightPngUrl": "/architecture/diagrams/system-architecture.light.png"
+  },
+  {
+    "slug": "end-to-end-topology",
+    "title": "End-to-End Application & Network Topology",
+    "category": "System Overview",
+    "type": "architecture",
+    "description": "Multi-tier network boundaries, TLS/WSS transport layer, in-memory DashMap connection routing, and local loopback developer mode.",
+    "tags": [
+      "WebSocket",
+      "TLS",
+      "DashMap",
+      "Loopback",
+      "Tokio"
+    ],
+    "htmlUrl": "/architecture/diagrams/end-to-end-topology.html",
+    "pngUrl": "/architecture/diagrams/end-to-end-topology.png",
+    "previewUrl": "/architecture/diagrams/end-to-end-topology.png",
+    "darkPngUrl": "/architecture/diagrams/end-to-end-topology.dark.png",
+    "lightPngUrl": "/architecture/diagrams/end-to-end-topology.light.png"
+  },
+  {
+    "slug": "frontend-architecture",
+    "title": "React Frontend Architecture & Component Hierarchy",
+    "category": "Frontend Architecture",
+    "type": "architecture",
+    "description": "Component structure of the web client showing App root, connection state machine, LandingPage, Console Tab Router, TerminalView, noble-hashes, and WebGL-accelerated canvas.",
+    "tags": [
+      "React 19",
+      "TypeScript",
+      "xterm.js",
+      "WebGL",
+      "Tailwind CSS",
+      "State Machine"
+    ],
+    "htmlUrl": "/architecture/diagrams/frontend-architecture.html",
+    "pngUrl": "/architecture/diagrams/frontend-architecture.png",
+    "previewUrl": "/architecture/diagrams/frontend-architecture.png",
+    "darkPngUrl": "/architecture/diagrams/frontend-architecture.dark.png",
+    "lightPngUrl": "/architecture/diagrams/frontend-architecture.light.png"
+  },
+  {
+    "slug": "terminal-pipeline",
+    "title": "Terminal UI & xterm.js Rendering Pipeline",
+    "category": "Frontend Architecture",
+    "type": "dataflow",
+    "description": "High-throughput dataflow from encrypted WebSocket frame intake to Base64 decode, ChaCha20-Poly1305 decryption, binary demux, ANSI/VT100 parsing, and 60 FPS Canvas render.",
+    "tags": [
+      "xterm.js",
+      "Web Crypto",
+      "ANSI / VT100",
+      "FitAddon",
+      "Canvas 2D"
+    ],
+    "htmlUrl": "/architecture/diagrams/terminal-pipeline.html",
+    "pngUrl": "/architecture/diagrams/terminal-pipeline.png",
+    "previewUrl": "/architecture/diagrams/terminal-pipeline.png",
+    "darkPngUrl": "/architecture/diagrams/terminal-pipeline.dark.png",
+    "lightPngUrl": "/architecture/diagrams/terminal-pipeline.light.png"
+  },
+  {
+    "slug": "signaling-server",
+    "title": "Rust Axum Signaling Server & Session Registry",
+    "category": "Backend Architecture",
+    "type": "architecture",
+    "description": "High-concurrency Axum signaling daemon utilizing thread-safe DashMap session storage, token-bucket rate limiting, heartbeat tracking, and zero-knowledge frame forwarding.",
+    "tags": [
+      "Rust",
+      "Axum",
+      "Tokio",
+      "DashMap",
+      "Rate Limiting",
+      "WebSockets"
+    ],
+    "htmlUrl": "/architecture/diagrams/signaling-server.html",
+    "pngUrl": "/architecture/diagrams/signaling-server.png",
+    "previewUrl": "/architecture/diagrams/signaling-server.png",
+    "darkPngUrl": "/architecture/diagrams/signaling-server.dark.png",
+    "lightPngUrl": "/architecture/diagrams/signaling-server.light.png"
+  },
+  {
+    "slug": "protocol-framing",
+    "title": "WebSocket Protocol & Binary Framing Architecture",
+    "category": "Backend Architecture",
+    "type": "dataflow",
+    "description": "Dataflow distinguishing JSON control plane messages (register, join, pair_request, pair_accept) from 0x01 Data and 0x02 Resize binary frames.",
+    "tags": [
+      "Protocol",
+      "Binary Framing",
+      "JSON Signaling",
+      "Serde",
+      "Base64"
+    ],
+    "htmlUrl": "/architecture/diagrams/protocol-framing.html",
+    "pngUrl": "/architecture/diagrams/protocol-framing.png",
+    "previewUrl": "/architecture/diagrams/protocol-framing.png",
+    "darkPngUrl": "/architecture/diagrams/protocol-framing.dark.png",
+    "lightPngUrl": "/architecture/diagrams/protocol-framing.light.png"
+  },
+  {
+    "slug": "host-session-workflow",
+    "title": "Host Session Creation & Pairing Workflow",
+    "category": "Host & Viewer Workflows",
+    "type": "workflow",
+    "description": "Step-by-step workflow from `shellvyn share` invocation, PTY allocation, Crockford Base32 keygen, relay registration, guest pairing prompt, to active session streaming.",
+    "tags": [
+      "CLI",
+      "Crockford Base32",
+      "Approval Gate",
+      "Session Init"
+    ],
+    "htmlUrl": "/architecture/diagrams/host-session-workflow.html",
+    "pngUrl": "/architecture/diagrams/host-session-workflow.png",
+    "previewUrl": "/architecture/diagrams/host-session-workflow.png",
+    "darkPngUrl": "/architecture/diagrams/host-session-workflow.dark.png",
+    "lightPngUrl": "/architecture/diagrams/host-session-workflow.light.png"
+  },
+  {
+    "slug": "viewer-join-sequence",
+    "title": "Viewer Join & Host Authorization Sequence",
+    "category": "Host & Viewer Workflows",
+    "type": "sequence",
+    "description": "Temporal sequence of events between Browser Guest, Signaling Relay, and Host CLI when negotiating session connection and interactive permissions.",
+    "tags": [
+      "Sequence",
+      "Handshake",
+      "Pair Request",
+      "Consent Flow"
+    ],
+    "htmlUrl": "/architecture/diagrams/viewer-join-sequence.html",
+    "pngUrl": "/architecture/diagrams/viewer-join-sequence.png",
+    "previewUrl": "/architecture/diagrams/viewer-join-sequence.png",
+    "darkPngUrl": "/architecture/diagrams/viewer-join-sequence.dark.png",
+    "lightPngUrl": "/architecture/diagrams/viewer-join-sequence.light.png"
+  },
+  {
+    "slug": "pty-lifecycle",
+    "title": "Native ConPTY & POSIX Terminal Lifecycle",
+    "category": "Terminal Architecture",
+    "type": "lifecycle",
+    "description": "Terminal process state transitions from initialization, ConPTY/openpty allocation, active I/O loop, terminal resize events (SIGWINCH), to process termination and cleanup.",
+    "tags": [
+      "ConPTY",
+      "POSIX openpty",
+      "SIGWINCH",
+      "Process Lifecycle",
+      "Win32 API"
+    ],
+    "htmlUrl": "/architecture/diagrams/pty-lifecycle.html",
+    "pngUrl": "/architecture/diagrams/pty-lifecycle.png",
+    "previewUrl": "/architecture/diagrams/pty-lifecycle.png",
+    "darkPngUrl": "/architecture/diagrams/pty-lifecycle.dark.png",
+    "lightPngUrl": "/architecture/diagrams/pty-lifecycle.light.png"
+  },
+  {
+    "slug": "security-key-derivation",
+    "title": "ChaCha20-Poly1305 Cryptographic Key Derivation Flow",
+    "category": "Security Architecture",
+    "type": "dataflow",
+    "description": "Cryptographic pipeline deriving 256-bit symmetric keys from Crockford Base32 pairing code and relay session salt using HKDF-SHA256, with per-frame nonce management.",
+    "tags": [
+      "HKDF-SHA256",
+      "ChaCha20-Poly1305",
+      "E2EE",
+      "Zero-Knowledge",
+      "Web Crypto"
+    ],
+    "htmlUrl": "/architecture/diagrams/security-key-derivation.html",
+    "pngUrl": "/architecture/diagrams/security-key-derivation.png",
+    "previewUrl": "/architecture/diagrams/security-key-derivation.png",
+    "darkPngUrl": "/architecture/diagrams/security-key-derivation.dark.png",
+    "lightPngUrl": "/architecture/diagrams/security-key-derivation.light.png"
+  },
+  {
+    "slug": "zero-knowledge-security-model",
+    "title": "Zero-Knowledge Trust Boundaries & Security Model",
+    "category": "Security Architecture",
+    "type": "architecture",
+    "description": "Isolation of security domains: Host Local Zone (plaintext PTY access), Blinded Relay Zone (untrusted cloud relay with zero key access), and Browser Guest Sandbox.",
+    "tags": [
+      "Security Domains",
+      "Trust Boundaries",
+      "Blinded Relay",
+      "Zero-Trust"
+    ],
+    "htmlUrl": "/architecture/diagrams/zero-knowledge-security-model.html",
+    "pngUrl": "/architecture/diagrams/zero-knowledge-security-model.png",
+    "previewUrl": "/architecture/diagrams/zero-knowledge-security-model.png",
+    "darkPngUrl": "/architecture/diagrams/zero-knowledge-security-model.dark.png",
+    "lightPngUrl": "/architecture/diagrams/zero-knowledge-security-model.light.png"
+  },
+  {
+    "slug": "deployment-infrastructure",
+    "title": "Cloud Relay & Multi-Platform Deployment Architecture",
+    "category": "Infrastructure & Deployment",
+    "type": "architecture",
+    "description": "Production deployment topology showing Dockerized Axum container on Render, Cloudflare edge CDN, static assets at shellvyn.reck98.in, and GitHub Release binary distribution.",
+    "tags": [
+      "Render",
+      "Docker",
+      "Cloudflare",
+      "GitHub Releases",
+      "Cross-Compilation"
+    ],
+    "htmlUrl": "/architecture/diagrams/deployment-infrastructure.html",
+    "pngUrl": "/architecture/diagrams/deployment-infrastructure.png",
+    "previewUrl": "/architecture/diagrams/deployment-infrastructure.png",
+    "darkPngUrl": "/architecture/diagrams/deployment-infrastructure.dark.png",
+    "lightPngUrl": "/architecture/diagrams/deployment-infrastructure.light.png"
+  },
+  {
+    "slug": "terminal-streaming-sequence",
+    "title": "Bi-Directional Terminal Streaming Sequence",
+    "category": "Sequence & Data Flow",
+    "type": "sequence",
+    "description": "Real-time communication sequence showing PTY stdout capture, client-side encryption, WebSocket relay forwarding, and browser keystroke dispatch back to host stdin.",
+    "tags": [
+      "Bi-Directional",
+      "Sub-15ms Latency",
+      "Keystrokes",
+      "PTY Diffing"
+    ],
+    "htmlUrl": "/architecture/diagrams/terminal-streaming-sequence.html",
+    "pngUrl": "/architecture/diagrams/terminal-streaming-sequence.png",
+    "previewUrl": "/architecture/diagrams/terminal-streaming-sequence.png",
+    "darkPngUrl": "/architecture/diagrams/terminal-streaming-sequence.dark.png",
+    "lightPngUrl": "/architecture/diagrams/terminal-streaming-sequence.light.png"
+  },
+  {
+    "slug": "session-cleanup-sequence",
+    "title": "Session Disconnect & Resource Cleanup Sequence",
+    "category": "Sequence & Data Flow",
+    "type": "sequence",
+    "description": "Orderly teardown sequence when a session is closed: close frame broadcast, DashMap session deregistration, terminal process termination, and browser socket closure.",
+    "tags": [
+      "Teardown",
+      "Resource Cleanup",
+      "Graceful Shutdown",
+      "DashMap Eviction"
+    ],
+    "htmlUrl": "/architecture/diagrams/session-cleanup-sequence.html",
+    "pngUrl": "/architecture/diagrams/session-cleanup-sequence.png",
+    "previewUrl": "/architecture/diagrams/session-cleanup-sequence.png",
+    "darkPngUrl": "/architecture/diagrams/session-cleanup-sequence.dark.png",
+    "lightPngUrl": "/architecture/diagrams/session-cleanup-sequence.light.png"
+  }
+];
+    let activeCategory = 'All';
+    let searchQuery = '';
+
+    // Theme initialization
+    const theme = localStorage.getItem('shellvyn-theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    themeToggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('shellvyn-theme', next);
+      renderGrid();
+    });
+
+    // Populate Category Pills
+    const categories = ['All', ...Array.from(new Set(DIAGRAMS.map(d => d.category)))];
+    const pillsContainer = document.getElementById('categoryPills');
+    pillsContainer.innerHTML = categories.map(cat => {
+      const count = cat === 'All' ? DIAGRAMS.length : DIAGRAMS.filter(d => d.category === cat).length;
+      return `<button class="filter-pill ${cat === activeCategory ? 'active' : ''}" data-category="${cat}">${cat} (${count})</button>`;
+    }).join('');
+
+    pillsContainer.addEventListener('click', (e) => {
+      const pill = e.target.closest('.filter-pill');
+      if (!pill) return;
+      activeCategory = pill.dataset.category;
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.toggle('active', p.dataset.category === activeCategory));
+      renderGrid();
+    });
+
+    // Search input listener
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.toLowerCase().trim();
+      renderGrid();
+    });
+
+    function renderGrid() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      const grid = document.getElementById('diagramsGrid');
+      
+      const filtered = DIAGRAMS.filter(d => {
+        const matchesCategory = activeCategory === 'All' || d.category === activeCategory;
+        if (!matchesCategory) return false;
+        if (!searchQuery) return true;
+        return d.title.toLowerCase().includes(searchQuery) ||
+               d.description.toLowerCase().includes(searchQuery) ||
+               d.slug.toLowerCase().includes(searchQuery) ||
+               d.tags.some(t => t.toLowerCase().includes(searchQuery));
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 4rem 1rem; text-align: center; border: 1px dashed var(--border-default); border-radius: 12px; background: var(--bg-surface);">
+            <p class="mono" style="font-size: 0.85rem; color: var(--text-muted);">No diagrams found matching "${searchQuery}".</p>
+            <button class="btn" style="margin-top: 1rem;" onclick="document.getElementById('searchInput').value=''; searchQuery=''; renderGrid();">Reset search</button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(d => {
+        const imgSrc = currentTheme === 'dark' ? d.darkPngUrl : d.lightPngUrl;
+        return `
+          <article class="card">
+            <div class="card-thumb">
+              <img src="${imgSrc}" alt="${d.title}" loading="lazy" onerror="this.src='${d.pngUrl}'">
+              <span class="card-type-tag">${d.type}</span>
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="card-cat">${d.category}</div>
+                <h3 class="card-title">${d.title}</h3>
+                <p class="card-desc">${d.description}</p>
+              </div>
+              <div class="card-footer">
+                <div class="card-tags">
+                  ${d.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
+                </div>
+                <div class="card-actions">
+                  <a href="${d.htmlUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                    <span>Open Interactive</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
+                  </a>
+                  <a href="${d.pngUrl}" target="_blank" rel="noopener noreferrer" class="btn" style="flex: 0 0 auto; padding: 0.4rem 0.65rem;" title="View Canonical High-Resolution PNG">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                    <span>PNG</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    renderGrid();
+  </script>
+</body>
+</html>

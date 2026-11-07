@@ -40,6 +40,7 @@ interface LandingPageProps {
   onCopySnippet: (text: string, id: string) => void;
   isValidPairingCode: (code: string) => boolean;
   normalizePairingCode: (code: string) => string;
+  onOpenArchitecture?: () => void;
 }
 
 /** Official GitHub vector mark */
@@ -75,6 +76,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onCopySnippet,
   isValidPairingCode,
   normalizePairingCode,
+  onOpenArchitecture,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -885,12 +887,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </p>
             </div>
             <a
-              href="https://shellvyn.reck98.in/architecture"
+              href="/architecture"
+              onClick={(e) => {
+                if (onOpenArchitecture && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                  e.preventDefault();
+                  onOpenArchitecture();
+                }
+              }}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Explore Shellvyn architecture diagrams collection"
               className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] text-xs font-mono font-medium text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-all shrink-0 cursor-pointer shadow-xs active:scale-95 group"
             >
-              <span>System Architecture</span>
+              <span>Explore Gallery (14 Diagrams)</span>
               <ArrowUpRight className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </a>
           </div>
@@ -1027,7 +1036,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3.5 w-full sm:w-auto">
             {/* 1. System Architecture Pill */}
             <a
-              href="https://shellvyn.reck98.in/architecture"
+              href="/architecture"
+              onClick={(e) => {
+                if (onOpenArchitecture && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                  e.preventDefault();
+                  onOpenArchitecture();
+                }
+              }}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Shellvyn System Architecture documentation"

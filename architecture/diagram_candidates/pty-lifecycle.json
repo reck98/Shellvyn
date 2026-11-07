@@ -1,0 +1,132 @@
+{
+  "schema_version": 3,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Native ConPTY & POSIX Terminal Lifecycle",
+    "output": "web/public/architecture/diagrams/pty-lifecycle.html",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase"
+  },
+  "mainPath": [
+    "init",
+    "allocating",
+    "running",
+    "closing",
+    "terminated"
+  ],
+  "states": [
+    {
+      "id": "init",
+      "type": "start",
+      "label": "Session Start",
+      "sublabel": "shellvyn share",
+      "tag": "init",
+      "step": "01"
+    },
+    {
+      "id": "allocating",
+      "type": "active",
+      "label": "PTY Alloc",
+      "sublabel": "ConPTY / openpty",
+      "tag": "alloc",
+      "step": "02"
+    },
+    {
+      "id": "running",
+      "type": "success",
+      "label": "Active I/O",
+      "sublabel": "Streaming stdin/out",
+      "tag": "stream",
+      "step": "03"
+    },
+    {
+      "id": "resizing",
+      "type": "active",
+      "label": "Resizing",
+      "sublabel": "WinSize event",
+      "tag": "resize"
+    },
+    {
+      "id": "closing",
+      "type": "waiting",
+      "label": "Closing",
+      "sublabel": "Flush buffers",
+      "tag": "flush",
+      "step": "04"
+    },
+    {
+      "id": "terminated",
+      "type": "success",
+      "label": "Terminated",
+      "sublabel": "Exited cleanly",
+      "tag": "exit",
+      "step": "05"
+    },
+    {
+      "id": "failed",
+      "type": "failure",
+      "label": "Failed",
+      "sublabel": "Spawn error",
+      "tag": "error"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t1",
+      "from": "init",
+      "to": "allocating",
+      "label": "alloc"
+    },
+    {
+      "id": "t2",
+      "from": "allocating",
+      "to": "running",
+      "label": "spawn"
+    },
+    {
+      "id": "t3",
+      "from": "allocating",
+      "to": "failed",
+      "label": "error",
+      "variant": "security"
+    },
+    {
+      "id": "t4",
+      "from": "running",
+      "to": "resizing",
+      "label": "resize",
+      "variant": "dashed"
+    },
+    {
+      "id": "t5",
+      "from": "resizing",
+      "to": "running",
+      "label": "done"
+    },
+    {
+      "id": "t6",
+      "from": "running",
+      "to": "closing",
+      "label": "exit"
+    },
+    {
+      "id": "t7",
+      "from": "closing",
+      "to": "terminated",
+      "label": "close",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Cross-Platform Abstraction",
+      "items": [
+        "Windows: calls native CreatePseudoConsole Win32 API",
+        "Linux/macOS: calls POSIX openpty, fork, and execvp",
+        "Synchronous window resize matches guest browser cols & rows exactly"
+      ]
+    }
+  ]
+}

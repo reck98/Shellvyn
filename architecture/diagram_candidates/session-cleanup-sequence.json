@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Session Disconnect & Resource Cleanup Sequence",
+    "output": "web/public/architecture/diagrams/session-cleanup-sequence.html",
+    "viewBox": [
+      1080,
+      640
+    ],
+    "column_fit": "spread",
+    "animation": "trace",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "host_dev",
+      "type": "external",
+      "label": "Host Developer",
+      "sublabel": "Ctrl+C / exit"
+    },
+    {
+      "id": "host_cli",
+      "type": "backend",
+      "label": "Host CLI Agent",
+      "sublabel": "crates/shellvyn-agent"
+    },
+    {
+      "id": "relay_srv",
+      "type": "cloud",
+      "label": "Signaling Relay",
+      "sublabel": "Axum Service"
+    },
+    {
+      "id": "guest_app",
+      "type": "frontend",
+      "label": "Guest Web App",
+      "sublabel": "React / xterm"
+    },
+    {
+      "id": "pty_proc",
+      "type": "backend",
+      "label": "PTY Process",
+      "sublabel": "PowerShell / Bash"
+    }
+  ],
+  "segments": [
+    {
+      "from": 145,
+      "to": 255,
+      "label": "Termination Trigger"
+    },
+    {
+      "from": 265,
+      "to": 385,
+      "label": "Relay Cleanup & Eviction"
+    },
+    {
+      "from": 395,
+      "to": 485,
+      "label": "Client Teardown"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "host_dev",
+      "to": "host_cli",
+      "y": 160,
+      "label": "Ctrl+C or \"exit\" typed",
+      "variant": "default"
+    },
+    {
+      "id": "m2",
+      "from": "host_cli",
+      "to": "pty_proc",
+      "y": 195,
+      "label": "Terminate child process PID",
+      "variant": "security"
+    },
+    {
+      "id": "m3",
+      "from": "pty_proc",
+      "to": "host_cli",
+      "y": 230,
+      "label": "Child exit code (0)",
+      "variant": "return"
+    },
+    {
+      "id": "m4",
+      "from": "host_cli",
+      "to": "relay_srv",
+      "y": 280,
+      "label": "WS: 0x03 CloseFrame payload",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m5",
+      "from": "relay_srv",
+      "to": "guest_app",
+      "y": 320,
+      "label": "Forward 0x03 CloseFrame",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m6",
+      "from": "relay_srv",
+      "to": "host_cli",
+      "y": 360,
+      "label": "Close WebSocket channel",
+      "variant": "return"
+    },
+    {
+      "id": "m7",
+      "from": "guest_app",
+      "to": "host_dev",
+      "y": 415,
+      "label": "Display disconnected status",
+      "variant": "default"
+    },
+    {
+      "id": "m8",
+      "from": "host_cli",
+      "to": "host_dev",
+      "y": 455,
+      "label": "Console restored to standard mode",
+      "variant": "return"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "host_cli",
+      "from": 160,
+      "to": 465,
+      "type": "backend"
+    },
+    {
+      "participant": "relay_srv",
+      "from": 280,
+      "to": 370,
+      "type": "cloud"
+    },
+    {
+      "participant": "guest_app",
+      "from": 320,
+      "to": 425,
+      "type": "frontend"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Graceful Resource Reclamation",
+      "items": [
+        "Child PTY processes are cleanly terminated to prevent orphan zombie processes",
+        "Relay immediately drops DashMap memory allocations",
+        "Guest browser closes WebSocket and displays disconnected overlay with reconnect option"
+      ]
+    }
+  ]
+}

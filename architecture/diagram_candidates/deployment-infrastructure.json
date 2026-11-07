@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Cloud Relay & Multi-Platform Deployment Architecture",
+    "output": "web/public/architecture/diagrams/deployment-infrastructure.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "github_actions",
+      "type": "backend",
+      "label": "GitHub CI/CD",
+      "sublabel": "Workflow Build Engine",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "tag": ".github/workflows"
+    },
+    {
+      "id": "gh_releases",
+      "type": "cloud",
+      "label": "GitHub Releases",
+      "sublabel": "Multi-Arch Binaries",
+      "pos": [
+        230,
+        140
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "shellvyn v0.1.0"
+    },
+    {
+      "id": "render_docker",
+      "type": "cloud",
+      "label": "Render Web Service",
+      "sublabel": "Dockerized Rust Axum",
+      "pos": [
+        230,
+        280
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "render.yaml Blueprint"
+    },
+    {
+      "id": "cloudflare_cdn",
+      "type": "cloud",
+      "label": "Cloudflare Edge CDN",
+      "sublabel": "Edge caching & TLS",
+      "pos": [
+        480,
+        220
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Custom Domain"
+    },
+    {
+      "id": "web_client_site",
+      "type": "frontend",
+      "label": "Static Web Client",
+      "sublabel": "shellvyn.reck98.in",
+      "pos": [
+        720,
+        160
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Vite / React 19"
+    },
+    {
+      "id": "relay_endpoint",
+      "type": "cloud",
+      "label": "Signaling Gateway",
+      "sublabel": "shellvyn-signaling.onrender.com",
+      "pos": [
+        720,
+        280
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "tag": "WebSocket Relay"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Continuous Integration & Release Hub",
+      "wraps": [
+        "github_actions",
+        "gh_releases",
+        "render_docker"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Production Edge & Hosting Infrastructure",
+      "wraps": [
+        "cloudflare_cdn",
+        "web_client_site",
+        "relay_endpoint"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "ci-to-releases",
+      "from": "github_actions",
+      "to": "gh_releases",
+      "label": "Cross-compile binaries",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ci-to-render",
+      "from": "github_actions",
+      "to": "render_docker",
+      "label": "Deploy Blueprint",
+      "variant": "default"
+    },
+    {
+      "id": "render-to-cf",
+      "from": "render_docker",
+      "to": "cloudflare_cdn",
+      "label": "Origin routing",
+      "variant": "default"
+    },
+    {
+      "id": "cf-to-web",
+      "from": "cloudflare_cdn",
+      "to": "web_client_site",
+      "label": "Serve HTML/JS/CSS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "cf-to-relay",
+      "from": "cloudflare_cdn",
+      "to": "relay_endpoint",
+      "label": "WSS Upgrade",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Automated CI/CD Pipeline",
+      "items": [
+        "Cross-compilation targets: x86_64-pc-windows-msvc and x86_64-unknown-linux-gnu",
+        "Render automatically pulls main branch updates via render.yaml blueprint",
+        "Static SPA hosted with edge routing rewrite to index.html"
+      ]
+    }
+  ]
+}

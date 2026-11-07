@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Bi-Directional Terminal Streaming Sequence",
+    "output": "web/public/architecture/diagrams/terminal-streaming-sequence.html",
+    "viewBox": [
+      1080,
+      640
+    ],
+    "column_fit": "spread",
+    "animation": "trace",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "pty_core",
+      "type": "backend",
+      "label": "PTY (Host OS)",
+      "sublabel": "ConPTY / POSIX"
+    },
+    {
+      "id": "host_agent",
+      "type": "backend",
+      "label": "Host Agent",
+      "sublabel": "CLI Reader/Writer"
+    },
+    {
+      "id": "relay_svc",
+      "type": "cloud",
+      "label": "Relay Server",
+      "sublabel": "Axum Forwarder"
+    },
+    {
+      "id": "web_client",
+      "type": "frontend",
+      "label": "Web Client",
+      "sublabel": "xterm.js"
+    },
+    {
+      "id": "guest_user",
+      "type": "external",
+      "label": "Guest User",
+      "sublabel": "Keyboard & View"
+    }
+  ],
+  "segments": [
+    {
+      "from": 145,
+      "to": 280,
+      "label": "Host Terminal Output Stream"
+    },
+    {
+      "from": 290,
+      "to": 420,
+      "label": "Guest Keystroke Injection"
+    },
+    {
+      "from": 430,
+      "to": 510,
+      "label": "Terminal Geometry Synchronization"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "pty_core",
+      "to": "host_agent",
+      "y": 160,
+      "label": "PTY stdout event (ANSI escape bytes)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m2",
+      "from": "host_agent",
+      "to": "relay_svc",
+      "y": 195,
+      "label": "WS: relay_data(ChaCha20 ciphertext)",
+      "variant": "security"
+    },
+    {
+      "id": "m3",
+      "from": "relay_svc",
+      "to": "web_client",
+      "y": 230,
+      "label": "WS: forward ciphertext frame",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m4",
+      "from": "web_client",
+      "to": "guest_user",
+      "y": 265,
+      "label": "Decrypt & render ANSI frame",
+      "variant": "return"
+    },
+    {
+      "id": "m5",
+      "from": "guest_user",
+      "to": "web_client",
+      "y": 305,
+      "label": "Types command (\"cargo test\\n\")",
+      "variant": "default"
+    },
+    {
+      "id": "m6",
+      "from": "web_client",
+      "to": "relay_svc",
+      "y": 340,
+      "label": "WS: relay_data(encrypted keystrokes)",
+      "variant": "security"
+    },
+    {
+      "id": "m7",
+      "from": "relay_svc",
+      "to": "host_agent",
+      "y": 375,
+      "label": "WS: forward keystrokes",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m8",
+      "from": "host_agent",
+      "to": "pty_core",
+      "y": 405,
+      "label": "Write bytes to PTY stdin pipe",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m9",
+      "from": "web_client",
+      "to": "host_agent",
+      "y": 445,
+      "label": "0x02 ResizeFrame(cols: 120, rows: 35)",
+      "variant": "dashed"
+    },
+    {
+      "id": "m10",
+      "from": "host_agent",
+      "to": "pty_core",
+      "y": 480,
+      "label": "ResizePseudoConsole() Win32 call",
+      "variant": "return"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "pty_core",
+      "from": 160,
+      "to": 485,
+      "type": "backend"
+    },
+    {
+      "participant": "host_agent",
+      "from": 160,
+      "to": 485,
+      "type": "backend"
+    },
+    {
+      "participant": "relay_svc",
+      "from": 195,
+      "to": 395,
+      "type": "cloud"
+    },
+    {
+      "participant": "web_client",
+      "from": 230,
+      "to": 460,
+      "type": "frontend"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Bi-Directional Streaming",
+      "items": [
+        "PTY stdout is captured synchronously and pushed immediately",
+        "Guest keystrokes flow in real-time back to host stdin",
+        "Window resize events adapt the host PTY to the guest browser dimensions"
+      ]
+    }
+  ]
+}

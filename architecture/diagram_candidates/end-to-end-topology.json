@@ -1,0 +1,262 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "End-to-End Application & Network Topology",
+    "output": "web/public/architecture/diagrams/end-to-end-topology.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "local_user",
+      "type": "external",
+      "label": "Host Developer",
+      "sublabel": "CLI Terminal User",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        130,
+        64
+      ],
+      "tag": "Local Terminal"
+    },
+    {
+      "id": "shellvyn_cli",
+      "type": "backend",
+      "label": "Shellvyn Agent",
+      "sublabel": "crates/shellvyn-agent",
+      "pos": [
+        220,
+        220
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "tag": "Native Process"
+    },
+    {
+      "id": "local_pty",
+      "type": "backend",
+      "label": "PTY Engine",
+      "sublabel": "ConPTY / POSIX",
+      "pos": [
+        220,
+        340
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "tag": "PowerShell / Bash"
+    },
+    {
+      "id": "loopback_srv",
+      "type": "backend",
+      "label": "Loopback Daemon",
+      "sublabel": "127.0.0.1:3000",
+      "pos": [
+        220,
+        460
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "tag": "Offline Mode"
+    },
+    {
+      "id": "edge_tls",
+      "type": "cloud",
+      "label": "Cloudflare Edge",
+      "sublabel": "TLS Termination :443",
+      "pos": [
+        430,
+        220
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "tag": "HTTPS / WSS"
+    },
+    {
+      "id": "relay_cluster",
+      "type": "cloud",
+      "label": "Axum Relay",
+      "sublabel": "Tokio Worker Pool",
+      "pos": [
+        630,
+        220
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "shellvyn-signaling"
+    },
+    {
+      "id": "session_map",
+      "type": "database",
+      "label": "Memory DashMap",
+      "sublabel": "Arc<RwLock<Session>>",
+      "pos": [
+        630,
+        340
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Lockless Store"
+    },
+    {
+      "id": "guest_browser",
+      "type": "frontend",
+      "label": "Guest Browser",
+      "sublabel": "Chrome / Safari / Firefox",
+      "pos": [
+        850,
+        220
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Client Sandbox"
+    },
+    {
+      "id": "xterm_viewport",
+      "type": "frontend",
+      "label": "xterm.js Canvas",
+      "sublabel": "VT100 Display",
+      "pos": [
+        850,
+        340
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "60 FPS Viewport"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Host Local Subsystem (Zero Cloud Dep)",
+      "wraps": [
+        "local_user",
+        "shellvyn_cli",
+        "local_pty",
+        "loopback_srv"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Cloud Signaling Layer (Render Platform)",
+      "wraps": [
+        "edge_tls",
+        "relay_cluster",
+        "session_map"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Guest Client Sandbox (Zero Local Install)",
+      "wraps": [
+        "guest_browser",
+        "xterm_viewport"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "dev-to-cli",
+      "from": "local_user",
+      "to": "shellvyn_cli",
+      "label": "shellvyn share",
+      "variant": "emphasis"
+    },
+    {
+      "id": "cli-to-pty",
+      "from": "shellvyn_cli",
+      "to": "local_pty",
+      "label": "Spawn PTY Pipe",
+      "variant": "emphasis"
+    },
+    {
+      "id": "cli-to-loopback",
+      "from": "shellvyn_cli",
+      "to": "loopback_srv",
+      "label": "shellvyn local",
+      "variant": "dashed"
+    },
+    {
+      "id": "cli-to-edge",
+      "from": "shellvyn_cli",
+      "to": "edge_tls",
+      "label": "WSS Connect",
+      "variant": "emphasis"
+    },
+    {
+      "id": "edge-to-relay",
+      "from": "edge_tls",
+      "to": "relay_cluster",
+      "label": "Reverse Proxy",
+      "variant": "default"
+    },
+    {
+      "id": "relay-to-map",
+      "from": "relay_cluster",
+      "to": "session_map",
+      "label": "Lookup Session",
+      "variant": "default"
+    },
+    {
+      "id": "relay-to-guest",
+      "from": "relay_cluster",
+      "to": "guest_browser",
+      "label": "WebSocket Relay",
+      "variant": "emphasis"
+    },
+    {
+      "id": "guest-to-xterm",
+      "from": "guest_browser",
+      "to": "xterm_viewport",
+      "label": "DOM Events",
+      "variant": "default"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Local Isolation",
+      "items": [
+        "Host agent executes directly in user space without root",
+        "ConPTY creates an isolated pseudo-console pipe",
+        "Offline loopback server enables local development without WAN"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Relay Ingress",
+      "items": [
+        "Cloudflare provides DDoS mitigation and TLS termination",
+        "Render hosts the containerized Axum signaling daemon",
+        "DashMap maintains active session channels in RAM"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Guest Sandboxing",
+      "items": [
+        "Browser accesses app over strict HTTPS",
+        "Zero plugins or guest software required",
+        "Terminal input and resize events sent over encrypted WebSocket"
+      ]
+    }
+  ]
+}

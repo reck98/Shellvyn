@@ -1,0 +1,267 @@
+[
+  {
+    "slug": "system-architecture",
+    "title": "Complete System Architecture",
+    "category": "System Overview",
+    "type": "architecture",
+    "description": "End-to-end zero-knowledge architecture spanning native Host PTY, Rust CLI agent, Axum stateless signaling relay on Render, and React 19 xterm.js browser client with ChaCha20-Poly1305 encryption.",
+    "tags": [
+      "Rust",
+      "ConPTY",
+      "POSIX",
+      "Axum",
+      "ChaCha20-Poly1305",
+      "xterm.js",
+      "Render"
+    ],
+    "htmlUrl": "/architecture/diagrams/system-architecture.html",
+    "pngUrl": "/architecture/diagrams/system-architecture.png",
+    "previewUrl": "/architecture/diagrams/system-architecture.png",
+    "darkPngUrl": "/architecture/diagrams/system-architecture.dark.png",
+    "lightPngUrl": "/architecture/diagrams/system-architecture.light.png"
+  },
+  {
+    "slug": "end-to-end-topology",
+    "title": "End-to-End Application & Network Topology",
+    "category": "System Overview",
+    "type": "architecture",
+    "description": "Multi-tier network boundaries, TLS/WSS transport layer, in-memory DashMap connection routing, and local loopback developer mode.",
+    "tags": [
+      "WebSocket",
+      "TLS",
+      "DashMap",
+      "Loopback",
+      "Tokio"
+    ],
+    "htmlUrl": "/architecture/diagrams/end-to-end-topology.html",
+    "pngUrl": "/architecture/diagrams/end-to-end-topology.png",
+    "previewUrl": "/architecture/diagrams/end-to-end-topology.png",
+    "darkPngUrl": "/architecture/diagrams/end-to-end-topology.dark.png",
+    "lightPngUrl": "/architecture/diagrams/end-to-end-topology.light.png"
+  },
+  {
+    "slug": "frontend-architecture",
+    "title": "React Frontend Architecture & Component Hierarchy",
+    "category": "Frontend Architecture",
+    "type": "architecture",
+    "description": "Component structure of the web client showing App root, connection state machine, LandingPage, Console Tab Router, TerminalView, noble-hashes, and WebGL-accelerated canvas.",
+    "tags": [
+      "React 19",
+      "TypeScript",
+      "xterm.js",
+      "WebGL",
+      "Tailwind CSS",
+      "State Machine"
+    ],
+    "htmlUrl": "/architecture/diagrams/frontend-architecture.html",
+    "pngUrl": "/architecture/diagrams/frontend-architecture.png",
+    "previewUrl": "/architecture/diagrams/frontend-architecture.png",
+    "darkPngUrl": "/architecture/diagrams/frontend-architecture.dark.png",
+    "lightPngUrl": "/architecture/diagrams/frontend-architecture.light.png"
+  },
+  {
+    "slug": "terminal-pipeline",
+    "title": "Terminal UI & xterm.js Rendering Pipeline",
+    "category": "Frontend Architecture",
+    "type": "dataflow",
+    "description": "High-throughput dataflow from encrypted WebSocket frame intake to Base64 decode, ChaCha20-Poly1305 decryption, binary demux, ANSI/VT100 parsing, and 60 FPS Canvas render.",
+    "tags": [
+      "xterm.js",
+      "Web Crypto",
+      "ANSI / VT100",
+      "FitAddon",
+      "Canvas 2D"
+    ],
+    "htmlUrl": "/architecture/diagrams/terminal-pipeline.html",
+    "pngUrl": "/architecture/diagrams/terminal-pipeline.png",
+    "previewUrl": "/architecture/diagrams/terminal-pipeline.png",
+    "darkPngUrl": "/architecture/diagrams/terminal-pipeline.dark.png",
+    "lightPngUrl": "/architecture/diagrams/terminal-pipeline.light.png"
+  },
+  {
+    "slug": "signaling-server",
+    "title": "Rust Axum Signaling Server & Session Registry",
+    "category": "Backend Architecture",
+    "type": "architecture",
+    "description": "High-concurrency Axum signaling daemon utilizing thread-safe DashMap session storage, token-bucket rate limiting, heartbeat tracking, and zero-knowledge frame forwarding.",
+    "tags": [
+      "Rust",
+      "Axum",
+      "Tokio",
+      "DashMap",
+      "Rate Limiting",
+      "WebSockets"
+    ],
+    "htmlUrl": "/architecture/diagrams/signaling-server.html",
+    "pngUrl": "/architecture/diagrams/signaling-server.png",
+    "previewUrl": "/architecture/diagrams/signaling-server.png",
+    "darkPngUrl": "/architecture/diagrams/signaling-server.dark.png",
+    "lightPngUrl": "/architecture/diagrams/signaling-server.light.png"
+  },
+  {
+    "slug": "protocol-framing",
+    "title": "WebSocket Protocol & Binary Framing Architecture",
+    "category": "Backend Architecture",
+    "type": "dataflow",
+    "description": "Dataflow distinguishing JSON control plane messages (register, join, pair_request, pair_accept) from 0x01 Data and 0x02 Resize binary frames.",
+    "tags": [
+      "Protocol",
+      "Binary Framing",
+      "JSON Signaling",
+      "Serde",
+      "Base64"
+    ],
+    "htmlUrl": "/architecture/diagrams/protocol-framing.html",
+    "pngUrl": "/architecture/diagrams/protocol-framing.png",
+    "previewUrl": "/architecture/diagrams/protocol-framing.png",
+    "darkPngUrl": "/architecture/diagrams/protocol-framing.dark.png",
+    "lightPngUrl": "/architecture/diagrams/protocol-framing.light.png"
+  },
+  {
+    "slug": "host-session-workflow",
+    "title": "Host Session Creation & Pairing Workflow",
+    "category": "Host & Viewer Workflows",
+    "type": "workflow",
+    "description": "Step-by-step workflow from `shellvyn share` invocation, PTY allocation, Crockford Base32 keygen, relay registration, guest pairing prompt, to active session streaming.",
+    "tags": [
+      "CLI",
+      "Crockford Base32",
+      "Approval Gate",
+      "Session Init"
+    ],
+    "htmlUrl": "/architecture/diagrams/host-session-workflow.html",
+    "pngUrl": "/architecture/diagrams/host-session-workflow.png",
+    "previewUrl": "/architecture/diagrams/host-session-workflow.png",
+    "darkPngUrl": "/architecture/diagrams/host-session-workflow.dark.png",
+    "lightPngUrl": "/architecture/diagrams/host-session-workflow.light.png"
+  },
+  {
+    "slug": "viewer-join-sequence",
+    "title": "Viewer Join & Host Authorization Sequence",
+    "category": "Host & Viewer Workflows",
+    "type": "sequence",
+    "description": "Temporal sequence of events between Browser Guest, Signaling Relay, and Host CLI when negotiating session connection and interactive permissions.",
+    "tags": [
+      "Sequence",
+      "Handshake",
+      "Pair Request",
+      "Consent Flow"
+    ],
+    "htmlUrl": "/architecture/diagrams/viewer-join-sequence.html",
+    "pngUrl": "/architecture/diagrams/viewer-join-sequence.png",
+    "previewUrl": "/architecture/diagrams/viewer-join-sequence.png",
+    "darkPngUrl": "/architecture/diagrams/viewer-join-sequence.dark.png",
+    "lightPngUrl": "/architecture/diagrams/viewer-join-sequence.light.png"
+  },
+  {
+    "slug": "pty-lifecycle",
+    "title": "Native ConPTY & POSIX Terminal Lifecycle",
+    "category": "Terminal Architecture",
+    "type": "lifecycle",
+    "description": "Terminal process state transitions from initialization, ConPTY/openpty allocation, active I/O loop, terminal resize events (SIGWINCH), to process termination and cleanup.",
+    "tags": [
+      "ConPTY",
+      "POSIX openpty",
+      "SIGWINCH",
+      "Process Lifecycle",
+      "Win32 API"
+    ],
+    "htmlUrl": "/architecture/diagrams/pty-lifecycle.html",
+    "pngUrl": "/architecture/diagrams/pty-lifecycle.png",
+    "previewUrl": "/architecture/diagrams/pty-lifecycle.png",
+    "darkPngUrl": "/architecture/diagrams/pty-lifecycle.dark.png",
+    "lightPngUrl": "/architecture/diagrams/pty-lifecycle.light.png"
+  },
+  {
+    "slug": "security-key-derivation",
+    "title": "ChaCha20-Poly1305 Cryptographic Key Derivation Flow",
+    "category": "Security Architecture",
+    "type": "dataflow",
+    "description": "Cryptographic pipeline deriving 256-bit symmetric keys from Crockford Base32 pairing code and relay session salt using HKDF-SHA256, with per-frame nonce management.",
+    "tags": [
+      "HKDF-SHA256",
+      "ChaCha20-Poly1305",
+      "E2EE",
+      "Zero-Knowledge",
+      "Web Crypto"
+    ],
+    "htmlUrl": "/architecture/diagrams/security-key-derivation.html",
+    "pngUrl": "/architecture/diagrams/security-key-derivation.png",
+    "previewUrl": "/architecture/diagrams/security-key-derivation.png",
+    "darkPngUrl": "/architecture/diagrams/security-key-derivation.dark.png",
+    "lightPngUrl": "/architecture/diagrams/security-key-derivation.light.png"
+  },
+  {
+    "slug": "zero-knowledge-security-model",
+    "title": "Zero-Knowledge Trust Boundaries & Security Model",
+    "category": "Security Architecture",
+    "type": "architecture",
+    "description": "Isolation of security domains: Host Local Zone (plaintext PTY access), Blinded Relay Zone (untrusted cloud relay with zero key access), and Browser Guest Sandbox.",
+    "tags": [
+      "Security Domains",
+      "Trust Boundaries",
+      "Blinded Relay",
+      "Zero-Trust"
+    ],
+    "htmlUrl": "/architecture/diagrams/zero-knowledge-security-model.html",
+    "pngUrl": "/architecture/diagrams/zero-knowledge-security-model.png",
+    "previewUrl": "/architecture/diagrams/zero-knowledge-security-model.png",
+    "darkPngUrl": "/architecture/diagrams/zero-knowledge-security-model.dark.png",
+    "lightPngUrl": "/architecture/diagrams/zero-knowledge-security-model.light.png"
+  },
+  {
+    "slug": "deployment-infrastructure",
+    "title": "Cloud Relay & Multi-Platform Deployment Architecture",
+    "category": "Infrastructure & Deployment",
+    "type": "architecture",
+    "description": "Production deployment topology showing Dockerized Axum container on Render, Cloudflare edge CDN, static assets at shellvyn.reck98.in, and GitHub Release binary distribution.",
+    "tags": [
+      "Render",
+      "Docker",
+      "Cloudflare",
+      "GitHub Releases",
+      "Cross-Compilation"
+    ],
+    "htmlUrl": "/architecture/diagrams/deployment-infrastructure.html",
+    "pngUrl": "/architecture/diagrams/deployment-infrastructure.png",
+    "previewUrl": "/architecture/diagrams/deployment-infrastructure.png",
+    "darkPngUrl": "/architecture/diagrams/deployment-infrastructure.dark.png",
+    "lightPngUrl": "/architecture/diagrams/deployment-infrastructure.light.png"
+  },
+  {
+    "slug": "terminal-streaming-sequence",
+    "title": "Bi-Directional Terminal Streaming Sequence",
+    "category": "Sequence & Data Flow",
+    "type": "sequence",
+    "description": "Real-time communication sequence showing PTY stdout capture, client-side encryption, WebSocket relay forwarding, and browser keystroke dispatch back to host stdin.",
+    "tags": [
+      "Bi-Directional",
+      "Sub-15ms Latency",
+      "Keystrokes",
+      "PTY Diffing"
+    ],
+    "htmlUrl": "/architecture/diagrams/terminal-streaming-sequence.html",
+    "pngUrl": "/architecture/diagrams/terminal-streaming-sequence.png",
+    "previewUrl": "/architecture/diagrams/terminal-streaming-sequence.png",
+    "darkPngUrl": "/architecture/diagrams/terminal-streaming-sequence.dark.png",
+    "lightPngUrl": "/architecture/diagrams/terminal-streaming-sequence.light.png"
+  },
+  {
+    "slug": "session-cleanup-sequence",
+    "title": "Session Disconnect & Resource Cleanup Sequence",
+    "category": "Sequence & Data Flow",
+    "type": "sequence",
+    "description": "Orderly teardown sequence when a session is closed: close frame broadcast, DashMap session deregistration, terminal process termination, and browser socket closure.",
+    "tags": [
+      "Teardown",
+      "Resource Cleanup",
+      "Graceful Shutdown",
+      "DashMap Eviction"
+    ],
+    "htmlUrl": "/architecture/diagrams/session-cleanup-sequence.html",
+    "pngUrl": "/architecture/diagrams/session-cleanup-sequence.png",
+    "previewUrl": "/architecture/diagrams/session-cleanup-sequence.png",
+    "darkPngUrl": "/architecture/diagrams/session-cleanup-sequence.dark.png",
+    "lightPngUrl": "/architecture/diagrams/session-cleanup-sequence.light.png"
+  }
+]

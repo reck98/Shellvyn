@@ -1,0 +1,239 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Complete System Architecture",
+    "output": "web/public/architecture/diagrams/system-architecture.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "pty",
+      "type": "backend",
+      "label": "Native PTY",
+      "sublabel": "ConPTY / POSIX openpty",
+      "pos": [
+        50,
+        220
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "tag": "OS Kernel"
+    },
+    {
+      "id": "host_agent",
+      "type": "backend",
+      "label": "Host Agent (CLI)",
+      "sublabel": "shellvyn share (Rust)",
+      "pos": [
+        240,
+        220
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "crates/shellvyn-agent"
+    },
+    {
+      "id": "crypto_host",
+      "type": "security",
+      "label": "ChaCha20 Engine",
+      "sublabel": "ChaCha20-Poly1305",
+      "pos": [
+        240,
+        340
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "256-bit Key"
+    },
+    {
+      "id": "relay_axum",
+      "type": "cloud",
+      "label": "Blinded Relay Server",
+      "sublabel": "Axum / Tokio on Render",
+      "pos": [
+        480,
+        220
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "tag": "Stateless Forwarder"
+    },
+    {
+      "id": "session_registry",
+      "type": "database",
+      "label": "Session Registry",
+      "sublabel": "DashMap<String, Session>",
+      "pos": [
+        480,
+        340
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "tag": "In-Memory Store"
+    },
+    {
+      "id": "crypto_guest",
+      "type": "security",
+      "label": "Web Crypto Engine",
+      "sublabel": "noble-ciphers / ChaCha",
+      "pos": [
+        730,
+        340
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Client-Side Decrypt"
+    },
+    {
+      "id": "web_app",
+      "type": "frontend",
+      "label": "Web Client UI",
+      "sublabel": "React 19 + TypeScript",
+      "pos": [
+        730,
+        220
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "shellvyn.reck98.in"
+    },
+    {
+      "id": "xterm",
+      "type": "frontend",
+      "label": "xterm.js Canvas",
+      "sublabel": "WebGL VT100/ANSI",
+      "pos": [
+        930,
+        220
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "tag": "60 FPS Renderer"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Host Machine (Windows 10+ / Linux / macOS)",
+      "wraps": [
+        "pty",
+        "host_agent",
+        "crypto_host"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Cloud Infrastructure (Render Web Service)",
+      "wraps": [
+        "relay_axum",
+        "session_registry"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Browser Sandbox (Guest Viewer)",
+      "wraps": [
+        "crypto_guest",
+        "web_app",
+        "xterm"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "pty-to-agent",
+      "from": "pty",
+      "to": "host_agent",
+      "label": "Raw PTY Byte Stream",
+      "variant": "emphasis"
+    },
+    {
+      "id": "agent-to-crypto",
+      "from": "host_agent",
+      "to": "crypto_host",
+      "label": "Encrypt Frames",
+      "variant": "security"
+    },
+    {
+      "id": "agent-to-relay",
+      "from": "host_agent",
+      "to": "relay_axum",
+      "label": "TLS / WSS (Ciphertext)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "relay-to-registry",
+      "from": "relay_axum",
+      "to": "session_registry",
+      "label": "Lookup Session ID",
+      "variant": "default"
+    },
+    {
+      "id": "relay-to-web",
+      "from": "relay_axum",
+      "to": "web_app",
+      "label": "WSS Forward (Base64)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "web-to-crypto",
+      "from": "web_app",
+      "to": "crypto_guest",
+      "label": "Decrypt Frames",
+      "variant": "security"
+    },
+    {
+      "id": "web-to-xterm",
+      "from": "web_app",
+      "to": "xterm",
+      "label": "Render Terminal",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Native Host Endpoint",
+      "items": [
+        "Direct Windows ConPTY API or Linux POSIX openpty integration",
+        "Spawns native shells without containerization",
+        "Symmetric ChaCha20-Poly1305 encryption on host before sending"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Zero-Knowledge Cloud Relay",
+      "items": [
+        "Rust Axum web service hosted on Render",
+        "Stateless forwarder of encrypted Base64 payloads",
+        "Relay server never possesses decryption keys or inspects plaintext"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Browser Terminal Guest",
+      "items": [
+        "Zero software installation required for guests",
+        "Client-side decryption in browser via noble-ciphers",
+        "Hardware-accelerated rendering powered by xterm.js WebGL"
+      ]
+    }
+  ]
+}

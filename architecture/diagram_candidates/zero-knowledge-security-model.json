@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Zero-Knowledge Trust Boundaries & Security Model",
+    "output": "web/public/architecture/diagrams/zero-knowledge-security-model.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "pty_kernel",
+      "type": "backend",
+      "label": "Local PTY & Shell",
+      "sublabel": "Full OS privileges",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Privileged Zone"
+    },
+    {
+      "id": "host_guard",
+      "type": "security",
+      "label": "Authorization Guard",
+      "sublabel": "Consent gate [y/N]",
+      "pos": [
+        240,
+        220
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Host Firewall"
+    },
+    {
+      "id": "host_cipher",
+      "type": "security",
+      "label": "Host Cipher Boundary",
+      "sublabel": "ChaCha20-Poly1305",
+      "pos": [
+        240,
+        340
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Encrypt Out"
+    },
+    {
+      "id": "cloud_relay",
+      "type": "cloud",
+      "label": "Untrusted Relay Host",
+      "sublabel": "Public cloud (Render)",
+      "pos": [
+        490,
+        220
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "tag": "Zero-Trust Relay"
+    },
+    {
+      "id": "guest_cipher",
+      "type": "security",
+      "label": "Guest Cipher Boundary",
+      "sublabel": "Client-side Decrypt",
+      "pos": [
+        740,
+        340
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Decrypt In"
+    },
+    {
+      "id": "browser_sandbox",
+      "type": "frontend",
+      "label": "Browser DOM Sandbox",
+      "sublabel": "Restricted JS Context",
+      "pos": [
+        740,
+        220
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Isolated Client"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Host Trusted Execution Zone",
+      "wraps": [
+        "pty_kernel",
+        "host_guard",
+        "host_cipher"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Public Blinded Relay Zone (Zero Knowledge)",
+      "wraps": [
+        "cloud_relay"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Browser Guest Sandboxed Zone",
+      "wraps": [
+        "guest_cipher",
+        "browser_sandbox"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": "pty_kernel",
+      "to": "host_guard",
+      "label": "Raw terminal I/O",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c2",
+      "from": "host_guard",
+      "to": "host_cipher",
+      "label": "Permission granted",
+      "variant": "security"
+    },
+    {
+      "id": "c3",
+      "from": "host_cipher",
+      "to": "cloud_relay",
+      "label": "Encrypted ciphertext only",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c4",
+      "from": "cloud_relay",
+      "to": "guest_cipher",
+      "label": "Forwarded ciphertext",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c5",
+      "from": "guest_cipher",
+      "to": "browser_sandbox",
+      "label": "Decrypted terminal view",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Strict Boundary Enforcement",
+      "items": [
+        "Host trusted zone: Plaintext terminal bytes never escape without ChaCha20 encryption",
+        "Relay untrusted zone: Sees only opaque Base64 ciphertext, unable to decipher commands",
+        "Guest sandboxed zone: Cannot execute code on host without host consent"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,247 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "React Frontend Architecture & Component Hierarchy",
+    "output": "web/public/architecture/diagrams/frontend-architecture.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "app_root",
+      "type": "frontend",
+      "label": "App Component",
+      "sublabel": "web/src/App.tsx",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "tag": "State Coordinator"
+    },
+    {
+      "id": "conn_sm",
+      "type": "backend",
+      "label": "Connection State",
+      "sublabel": "idle | awaiting | connected",
+      "pos": [
+        240,
+        140
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "FSM Core"
+    },
+    {
+      "id": "landing_page",
+      "type": "frontend",
+      "label": "LandingPage",
+      "sublabel": "Hero & Features UI",
+      "pos": [
+        240,
+        260
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Presentation"
+    },
+    {
+      "id": "console_router",
+      "type": "frontend",
+      "label": "Console Router",
+      "sublabel": "Join vs Host Tab Router",
+      "pos": [
+        440,
+        140
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Tab Router"
+    },
+    {
+      "id": "terminal_view",
+      "type": "frontend",
+      "label": "TerminalView",
+      "sublabel": "xterm.js Container View",
+      "pos": [
+        440,
+        260
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Interactive Terminal"
+    },
+    {
+      "id": "web_crypto",
+      "type": "security",
+      "label": "Protocol Crypto",
+      "sublabel": "noble-hashes & ChaCha",
+      "pos": [
+        440,
+        380
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Web Crypto API"
+    },
+    {
+      "id": "xterm_core",
+      "type": "frontend",
+      "label": "xterm.js Engine",
+      "sublabel": "VT100 Emulation v5.5",
+      "pos": [
+        660,
+        200
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "tag": "Terminal Core"
+    },
+    {
+      "id": "fit_addon",
+      "type": "frontend",
+      "label": "FitAddon",
+      "sublabel": "Auto Geometry Resize",
+      "pos": [
+        660,
+        320
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "tag": "@xterm/addon-fit"
+    },
+    {
+      "id": "webgl_addon",
+      "type": "frontend",
+      "label": "WebglAddon",
+      "sublabel": "GPU Canvas Acceleration",
+      "pos": [
+        860,
+        260
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "tag": "Hardware Render"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "React UI & State Layer",
+      "wraps": [
+        "app_root",
+        "conn_sm",
+        "landing_page",
+        "console_router",
+        "terminal_view",
+        "web_crypto"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "xterm.js Rendering Subsystem",
+      "wraps": [
+        "xterm_core",
+        "fit_addon",
+        "webgl_addon"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "app-to-sm",
+      "from": "app_root",
+      "to": "conn_sm",
+      "label": "State Transitions",
+      "variant": "emphasis"
+    },
+    {
+      "id": "app-to-landing",
+      "from": "app_root",
+      "to": "landing_page",
+      "label": "Render Landing",
+      "variant": "default"
+    },
+    {
+      "id": "landing-to-router",
+      "from": "landing_page",
+      "to": "console_router",
+      "label": "Tab Selection",
+      "variant": "default"
+    },
+    {
+      "id": "app-to-termview",
+      "from": "app_root",
+      "to": "terminal_view",
+      "label": "Mount on Connect",
+      "variant": "emphasis"
+    },
+    {
+      "id": "termview-to-crypto",
+      "from": "terminal_view",
+      "to": "web_crypto",
+      "label": "Decrypt Payload",
+      "variant": "security"
+    },
+    {
+      "id": "termview-to-xterm",
+      "from": "terminal_view",
+      "to": "xterm_core",
+      "label": "Initialize Terminal",
+      "variant": "emphasis"
+    },
+    {
+      "id": "xterm-to-fit",
+      "from": "xterm_core",
+      "to": "fit_addon",
+      "label": "Fit Geometry",
+      "variant": "default"
+    },
+    {
+      "id": "xterm-to-webgl",
+      "from": "xterm_core",
+      "to": "webgl_addon",
+      "label": "Context Attach",
+      "variant": "default"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Predictable State Machine",
+      "items": [
+        "Connection state transitions: idle -> awaiting_approval -> connected -> disconnected",
+        "Automatic reconnection and resource cleanup on unmount",
+        "Session keys derived once and held in memory refs only"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "GPU-Accelerated Rendering",
+      "items": [
+        "WebglAddon delivers 60 FPS scrolling and low latency",
+        "Automatic fallback to 2D Canvas if WebGL is unsupported",
+        "FitAddon syncs character cell dimensions on container resize"
+      ]
+    }
+  ]
+}

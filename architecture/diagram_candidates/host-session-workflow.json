@@ -1,0 +1,198 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Host Session Creation & Pairing Workflow",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase",
+    "output": "web/public/architecture/diagrams/host-session-workflow.html"
+  },
+  "lanes": [
+    {
+      "id": "developer",
+      "label": "Host Developer"
+    },
+    {
+      "id": "agent_cli",
+      "label": "Shellvyn CLI Agent"
+    },
+    {
+      "id": "pty_engine",
+      "label": "PTY Process Engine"
+    },
+    {
+      "id": "signaling",
+      "label": "Relay Signaling Service"
+    }
+  ],
+  "phases": [
+    {
+      "id": "init",
+      "label": "Initialization",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "registration",
+      "label": "Registration & Keygen",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "pairing",
+      "label": "Pairing & Consent",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "groups": [
+    {
+      "id": "cli_setup",
+      "label": "Spawn & Key Setup",
+      "lane": "agent_cli",
+      "fromCol": 0,
+      "toCol": 2,
+      "variant": "emphasis"
+    },
+    {
+      "id": "consent_gate",
+      "label": "Human Authorization",
+      "lane": "developer",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "security"
+    }
+  ],
+  "mainPath": [
+    "run_cli",
+    "spawn_pty",
+    "gen_code",
+    "register_srv",
+    "wait_guest",
+    "prompt_user",
+    "stream_active"
+  ],
+  "nodes": [
+    {
+      "id": "run_cli",
+      "lane": "developer",
+      "col": 0,
+      "type": "external",
+      "label": "shellvyn share",
+      "sublabel": "Developer command",
+      "width": 140
+    },
+    {
+      "id": "spawn_pty",
+      "lane": "pty_engine",
+      "col": 1,
+      "type": "backend",
+      "label": "Spawn Native PTY",
+      "sublabel": "ConPTY / openpty",
+      "width": 140
+    },
+    {
+      "id": "gen_code",
+      "lane": "agent_cli",
+      "col": 2,
+      "type": "security",
+      "label": "Pairing Code Gen",
+      "sublabel": "Crockford Base32",
+      "width": 140
+    },
+    {
+      "id": "register_srv",
+      "lane": "signaling",
+      "col": 3,
+      "type": "cloud",
+      "label": "Register Session",
+      "sublabel": "Signaling WebSocket",
+      "width": 140
+    },
+    {
+      "id": "wait_guest",
+      "lane": "signaling",
+      "col": 4,
+      "type": "cloud",
+      "label": "Wait for Guest",
+      "sublabel": "Guest IP & User-Agent",
+      "width": 140
+    },
+    {
+      "id": "prompt_user",
+      "lane": "developer",
+      "col": 4,
+      "type": "security",
+      "label": "Consent Prompt",
+      "sublabel": "Approve connection? [y/N]",
+      "width": 140
+    },
+    {
+      "id": "stream_active",
+      "lane": "agent_cli",
+      "col": 5,
+      "type": "backend",
+      "label": "Active Streaming",
+      "sublabel": "ChaCha20 E2EE",
+      "width": 140
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "run_cli",
+      "to": "spawn_pty",
+      "label": "invoke",
+      "variant": "default"
+    },
+    {
+      "id": "e2",
+      "from": "spawn_pty",
+      "to": "gen_code",
+      "label": "pty ready",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e3",
+      "from": "gen_code",
+      "to": "register_srv",
+      "label": "register(code)",
+      "variant": "security"
+    },
+    {
+      "id": "e4",
+      "from": "register_srv",
+      "to": "wait_guest",
+      "label": "wait for guest",
+      "variant": "default"
+    },
+    {
+      "id": "e5",
+      "from": "wait_guest",
+      "to": "prompt_user",
+      "label": "pair_request",
+      "variant": "security"
+    },
+    {
+      "id": "e6",
+      "from": "prompt_user",
+      "to": "stream_active",
+      "label": "approve [Y]",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Explicit Human Consent",
+      "items": [
+        "Remote connections cannot access the shell without explicit host confirmation [y/N]",
+        "Host sees the connecting guest IP and User-Agent before approving",
+        "Read-only mode can be enforced via --read-only flag"
+      ]
+    }
+  ]
+}

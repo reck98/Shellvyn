@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Rust Axum Signaling Server & Session Registry",
+    "output": "web/public/architecture/diagrams/signaling-server.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "axum_http",
+      "type": "backend",
+      "label": "Axum Router",
+      "sublabel": "HTTP :8080 /ws",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "tag": "Axum Web Framework"
+    },
+    {
+      "id": "rate_limit",
+      "type": "security",
+      "label": "Rate Limiter",
+      "sublabel": "Token Bucket per IP",
+      "pos": [
+        230,
+        220
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "DDoS Shield"
+    },
+    {
+      "id": "ws_session",
+      "type": "backend",
+      "label": "WebSocket Handler",
+      "sublabel": "Tokio Async Task",
+      "pos": [
+        430,
+        220
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Split Stream"
+    },
+    {
+      "id": "session_reg",
+      "type": "database",
+      "label": "Session Registry",
+      "sublabel": "DashMap<String, Session>",
+      "pos": [
+        640,
+        160
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "tag": "Concurrent Map"
+    },
+    {
+      "id": "heartbeat_srv",
+      "type": "backend",
+      "label": "Heartbeat Watcher",
+      "sublabel": "60s Stale Eviction",
+      "pos": [
+        640,
+        280
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "tag": "Tokio Timer"
+    },
+    {
+      "id": "blinded_tx",
+      "type": "backend",
+      "label": "Blinded Forwarder",
+      "sublabel": "Zero-Knowledge Relay",
+      "pos": [
+        850,
+        220
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "Ciphertext Relay"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Axum Ingress & Filtering Subsystem",
+      "wraps": [
+        "axum_http",
+        "rate_limit",
+        "ws_session"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Concurrent Registry & Routing Core",
+      "wraps": [
+        "session_reg",
+        "heartbeat_srv",
+        "blinded_tx"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "http-to-limit",
+      "from": "axum_http",
+      "to": "rate_limit",
+      "label": "Inspect Handshake",
+      "variant": "security"
+    },
+    {
+      "id": "limit-to-ws",
+      "from": "rate_limit",
+      "to": "ws_session",
+      "label": "Upgrade Connection",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ws-to-reg",
+      "from": "ws_session",
+      "to": "session_reg",
+      "label": "Register / Lookup Code",
+      "variant": "default"
+    },
+    {
+      "id": "reg-to-hb",
+      "from": "session_reg",
+      "to": "heartbeat_srv",
+      "label": "Heartbeat Ping",
+      "variant": "dashed"
+    },
+    {
+      "id": "ws-to-forward",
+      "from": "ws_session",
+      "to": "blinded_tx",
+      "label": "Forward RelayData",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Lock-Free Concurrency",
+      "items": [
+        "DashMap eliminates global mutex bottlenecks under heavy session loads",
+        "Tokio runtime scales across all available CPU cores",
+        "Rate limiter blocks brute-force code enumeration"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Zero Decryption Capabilities",
+      "items": [
+        "Signaling server does not maintain private keys or certificates",
+        "Relay acts purely as a Blinded Packet Forwarder between client IDs"
+      ]
+    }
+  ]
+}

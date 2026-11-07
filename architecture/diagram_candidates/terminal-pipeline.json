@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Terminal UI & xterm.js Rendering Pipeline",
+    "output": "web/public/architecture/diagrams/terminal-pipeline.html",
+    "viewBox": [
+      1080,
+      520
+    ],
+    "animation": "trace",
+    "quality_profile": "showcase"
+  },
+  "stages": [
+    {
+      "label": "Ingest"
+    },
+    {
+      "label": "Transform"
+    },
+    {
+      "label": "Cryptographic Core"
+    },
+    {
+      "label": "Demux"
+    },
+    {
+      "label": "Render / Dispatch"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "ws_frame",
+      "type": "cloud",
+      "label": "WebSocket Frame",
+      "sublabel": "Ciphertext",
+      "stage": 0,
+      "row": 0,
+      "tag": "WSS In"
+    },
+    {
+      "id": "b64_decode",
+      "type": "backend",
+      "label": "Base64 Decoder",
+      "sublabel": "Uint8Array",
+      "stage": 1,
+      "row": 0,
+      "tag": "Raw Bytes"
+    },
+    {
+      "id": "chacha_dec",
+      "type": "security",
+      "label": "ChaCha20 Decrypt",
+      "sublabel": "256-bit Key",
+      "stage": 2,
+      "row": 0,
+      "tag": "Web Crypto"
+    },
+    {
+      "id": "frame_demux",
+      "type": "backend",
+      "label": "Binary Demux",
+      "sublabel": "0x01 / 0x02",
+      "stage": 3,
+      "row": 0,
+      "tag": "Demuxer"
+    },
+    {
+      "id": "ansi_parser",
+      "type": "frontend",
+      "label": "ANSI Parser",
+      "sublabel": "VT100 Engine",
+      "stage": 4,
+      "row": 0,
+      "tag": "xterm Core"
+    },
+    {
+      "id": "canvas_out",
+      "type": "frontend",
+      "label": "Canvas Viewport",
+      "sublabel": "WebGL 60 FPS",
+      "stage": 4,
+      "row": 1,
+      "tag": "Screen"
+    },
+    {
+      "id": "key_press",
+      "type": "frontend",
+      "label": "Keystroke Event",
+      "sublabel": "term.onData()",
+      "stage": 0,
+      "row": 2,
+      "tag": "User Input"
+    },
+    {
+      "id": "chacha_enc",
+      "type": "security",
+      "label": "ChaCha20 Encrypt",
+      "sublabel": "Poly1305 Tag",
+      "stage": 2,
+      "row": 2,
+      "tag": "Tag Append"
+    },
+    {
+      "id": "ws_tx",
+      "type": "cloud",
+      "label": "Relay Dispatch",
+      "sublabel": "WSS Payload",
+      "stage": 4,
+      "row": 2,
+      "tag": "WSS Out"
+    }
+  ],
+  "flows": [
+    {
+      "id": "f1",
+      "from": "ws_frame",
+      "to": "b64_decode",
+      "label": "base64 payload",
+      "classification": "envelope",
+      "variant": "default"
+    },
+    {
+      "id": "f2",
+      "from": "b64_decode",
+      "to": "chacha_dec",
+      "label": "ciphertext bytes",
+      "classification": "crypto",
+      "variant": "security"
+    },
+    {
+      "id": "f3",
+      "from": "chacha_dec",
+      "to": "frame_demux",
+      "label": "plaintext frame",
+      "classification": "binary",
+      "variant": "emphasis"
+    },
+    {
+      "id": "f4",
+      "from": "frame_demux",
+      "to": "ansi_parser",
+      "label": "0x01 PTY stdout",
+      "classification": "terminal",
+      "variant": "emphasis"
+    },
+    {
+      "id": "f5",
+      "from": "ansi_parser",
+      "to": "canvas_out",
+      "label": "glyph drawing",
+      "classification": "render",
+      "variant": "default"
+    },
+    {
+      "id": "f6",
+      "from": "key_press",
+      "to": "chacha_enc",
+      "label": "keystroke bytes",
+      "classification": "input",
+      "variant": "security"
+    },
+    {
+      "id": "f7",
+      "from": "chacha_enc",
+      "to": "ws_tx",
+      "label": "ciphertext payload",
+      "classification": "outbound",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Zero Plaintext Exposure",
+      "items": [
+        "Ciphertext enters browser and is decrypted exclusively in Web Worker / main thread memory",
+        "Plaintext bytes are fed directly to xterm parser without hitting DOM attributes"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Low Latency Loop",
+      "items": [
+        "Keystroke input triggers instant encryption and transmission without batching delay",
+        "Sub-15ms round-trip latency over WebSocket relay"
+      ]
+    }
+  ]
+}

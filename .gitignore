@@ -32,3 +32,4 @@ desktop.ini
 # Agent tooling
 .agents/
 skills-lock.json
+scratch/

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { TerminalView } from './components/TerminalView';
 import { LandingPage } from './components/LandingPage';
+import { ArchitectureGallery } from './components/ArchitectureGallery';
 import { Terminal } from '@xterm/xterm';
 import {
   PermissionMode,
@@ -57,6 +58,56 @@ export const App: React.FC = () => {
   const [activeConsoleTab, setActiveConsoleTab] = useState<'join' | 'host'>('join');
   const [installOs, setInstallOs] = useState<'windows' | 'linux' | 'cargo'>('windows');
   const [copiedSnippet, setCopiedSnippet] = useState<string | null>(null);
+
+  // View routing between Terminal Lobby and Architecture Gallery
+  const [currentView, setCurrentView] = useState<'app' | 'architecture'>(() => {
+    if (typeof window !== 'undefined') {
+      const pathname = window.location.pathname;
+      const hash = window.location.hash;
+      if (pathname.startsWith('/architecture') || hash === '#architecture-gallery') {
+        return 'architecture';
+      }
+    }
+    return 'app';
+  });
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const pathname = window.location.pathname;
+      const hash = window.location.hash;
+      if (pathname.startsWith('/architecture') || hash === '#architecture-gallery') {
+        setCurrentView('architecture');
+      } else {
+        setCurrentView('app');
+      }
+    };
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
+  }, []);
+
+  const navigateToArchitecture = useCallback(() => {
+    setCurrentView('architecture');
+    try {
+      window.history.pushState({}, '', '/architecture');
+    } catch {
+      window.location.hash = '#architecture-gallery';
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
+
+  const navigateToApp = useCallback(() => {
+    setCurrentView('app');
+    try {
+      window.history.pushState({}, '', '/');
+    } catch {
+      window.location.hash = '';
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
 
   const copySnippet = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -320,6 +371,16 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [connState]);
 
+  if (currentView === 'architecture') {
+    return (
+      <ArchitectureGallery
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onBackToApp={navigateToApp}
+      />
+    );
+  }
+
   if (connState === 'idle') {
     return (
       <div className="w-full min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] font-sans">
@@ -340,6 +401,7 @@ export const App: React.FC = () => {
           onCopySnippet={copySnippet}
           isValidPairingCode={isValidPairingCode}
           normalizePairingCode={normalizePairingCode}
+          onOpenArchitecture={navigateToArchitecture}
         />
       </div>
     );

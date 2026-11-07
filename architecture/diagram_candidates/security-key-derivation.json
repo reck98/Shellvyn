@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "ChaCha20-Poly1305 Cryptographic Key Derivation Flow",
+    "output": "web/public/architecture/diagrams/security-key-derivation.html",
+    "viewBox": [
+      1080,
+      520
+    ],
+    "animation": "trace",
+    "quality_profile": "showcase"
+  },
+  "stages": [
+    {
+      "label": "Entropy"
+    },
+    {
+      "label": "KDF Core"
+    },
+    {
+      "label": "Key Material"
+    },
+    {
+      "label": "Cipher"
+    },
+    {
+      "label": "Relay Wire"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "pair_code",
+      "type": "security",
+      "label": "Pair Code",
+      "sublabel": "Crockford Base32",
+      "stage": 0,
+      "row": 0,
+      "tag": "Secret"
+    },
+    {
+      "id": "salt_val",
+      "type": "security",
+      "label": "Salt Value",
+      "sublabel": "16B CSPRNG",
+      "stage": 0,
+      "row": 2,
+      "tag": "Salt"
+    },
+    {
+      "id": "hkdf_sha",
+      "type": "security",
+      "label": "HKDF-SHA256",
+      "sublabel": "RFC 5869 KDF",
+      "stage": 1,
+      "row": 1,
+      "tag": "Extract"
+    },
+    {
+      "id": "key_256",
+      "type": "security",
+      "label": "Session Key",
+      "sublabel": "256-Bit Master",
+      "stage": 2,
+      "row": 0,
+      "tag": "256b Key"
+    },
+    {
+      "id": "nonce_gen",
+      "type": "security",
+      "label": "Frame Nonce",
+      "sublabel": "96-Bit Counter",
+      "stage": 2,
+      "row": 2,
+      "tag": "Nonce"
+    },
+    {
+      "id": "chacha_cipher",
+      "type": "security",
+      "label": "ChaCha20",
+      "sublabel": "Poly1305 AEAD",
+      "stage": 3,
+      "row": 1,
+      "tag": "AEAD"
+    },
+    {
+      "id": "b64_wire",
+      "type": "cloud",
+      "label": "Relay Socket",
+      "sublabel": "Base64 Wire",
+      "stage": 4,
+      "row": 1,
+      "tag": "Payload"
+    }
+  ],
+  "flows": [
+    {
+      "id": "f1",
+      "from": "pair_code",
+      "to": "hkdf_sha",
+      "label": "Input Key Material",
+      "classification": "secret",
+      "variant": "security"
+    },
+    {
+      "id": "f2",
+      "from": "salt_val",
+      "to": "hkdf_sha",
+      "label": "Session Salt",
+      "classification": "salt",
+      "variant": "default"
+    },
+    {
+      "id": "f3",
+      "from": "hkdf_sha",
+      "to": "key_256",
+      "label": "Derived Key",
+      "classification": "key",
+      "variant": "emphasis"
+    },
+    {
+      "id": "f4",
+      "from": "key_256",
+      "to": "chacha_cipher",
+      "label": "Key Bytes",
+      "classification": "crypto",
+      "variant": "security"
+    },
+    {
+      "id": "f5",
+      "from": "nonce_gen",
+      "to": "chacha_cipher",
+      "label": "Nonce IV",
+      "classification": "iv",
+      "variant": "default"
+    },
+    {
+      "id": "f6",
+      "from": "chacha_cipher",
+      "to": "b64_wire",
+      "label": "Ciphertext + Tag",
+      "classification": "authenticated",
+      "variant": "emphasis",
+      "route": "straight"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Cryptographic Guarantees",
+      "items": [
+        "HKDF-SHA256 protects against weak shared secrets",
+        "ChaCha20-Poly1305 provides confidentiality and tamper detection",
+        "Relay server operates entirely in the ciphertext domain without access to derived keys"
+      ]
+    }
+  ]
+}
