@@ -48,6 +48,7 @@ enum Commands {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let _ = rustls::crypto::ring::default_provider().install_default();
     tracing_subscriber::fmt::init();
     let cli = Cli::parse();
 
