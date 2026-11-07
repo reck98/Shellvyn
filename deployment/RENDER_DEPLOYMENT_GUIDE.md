@@ -33,9 +33,9 @@ Render will display the Blueprint plan with two managed services:
 2. Render will trigger parallel build jobs:
    - Compiling the Docker image for `shellvyn-signaling` and verifying `/health`.
    - Running `npm ci && npm run build` for `shellvyn-web` and distributing assets to the global CDN.
-3. Once deployed, Render assigns two public URLs:
-   - Signaling Service: `https://shellvyn-signaling.onrender.com`
-   - Web Client: `https://shellvyn-web.onrender.com`
+3. Once deployed, Render assigns the public URLs:
+   - Signaling Service: `https://shellvyn-signaling.onrender.com` (WebSocket: `wss://shellvyn-signaling.onrender.com/ws`)
+   - Web Client: `https://shellvyn.reck98.in` (custom domain mapped to `shellvyn-web.onrender.com`)
 
 ---
 
@@ -90,7 +90,7 @@ shellvyn share --server wss://shellvyn-signaling.onrender.com/ws
 The CLI will output an active session box with a pairing code (e.g. `KV7M-9X2P`).
 
 ### 4. Connect from Web Client
-1. Open `https://shellvyn-web.onrender.com/` in your browser.
+1. Open `https://shellvyn.reck98.in/` in your browser.
 2. Enter the pairing code.
 3. Approve the connection prompt on your workstation terminal.
 4. Interact with your live terminal directly from the browser tab!

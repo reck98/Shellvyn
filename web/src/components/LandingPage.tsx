@@ -411,7 +411,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               {/* Terminal View Content */}
               <div className="p-4 text-xs font-mono leading-relaxed space-y-2 text-[var(--term-fg)] overflow-x-auto min-h-[320px]">
                 <div>
-                  <span className="text-[var(--gold)]">$</span> shellvyn share --server wss://relay.shellvyn.app/ws
+                  <span className="text-[var(--gold)]">$</span> shellvyn share
                 </div>
                 <div className="text-[var(--text-muted)]">
                   [Shellvyn] Initialized ConPTY process: powershell.exe (PID 14280)
@@ -423,7 +423,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="text-[var(--text-secondary)] py-1 border-y border-[var(--border-subtle)] my-2">
                   <div className="text-[var(--accent)] font-bold">╔══════════════════════════════════════════════════════════╗</div>
                   <div>║  PAIRING CODE : <span className="text-[var(--gold)] font-bold">K7M2-9XPQ</span>                                ║</div>
-                  <div>║  BROWSER LINK : https://shellvyn.app/#K7M2-9XPQ          ║</div>
+                  <div>║  BROWSER LINK : https://shellvyn.reck98.in/#K7M2-9XPQ   ║</div>
                   <div className="text-[var(--accent)] font-bold">╚══════════════════════════════════════════════════════════╝</div>
                 </div>
 

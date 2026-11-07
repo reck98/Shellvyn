@@ -220,7 +220,6 @@ export const App: React.FC = () => {
     }
 
     // 2. Dynamic runtime detection
-    const isHttps = window.location.protocol === 'https:';
     const hostname = window.location.hostname || '127.0.0.1';
 
     // Local development loopback fallback
@@ -228,9 +227,8 @@ export const App: React.FC = () => {
       return `ws://${hostname}:8080/ws`;
     }
 
-    // Production HTTPS / WSS termination fallback
-    const wsProto = isHttps ? 'wss:' : 'ws:';
-    return `${wsProto}//${window.location.host}/ws`;
+    // Production default signaling server
+    return 'wss://shellvyn-signaling.onrender.com/ws';
   }, []);
 
   const handleConnectLocal = () => {

@@ -209,7 +209,7 @@ sequenceDiagram
     Agent->>Agent: Derive Session Key = HKDF(code, session_salt)
     Agent-->>Host: Display Banner with Pairing Code & URL
 
-    Viewer->>Web: Open https://shellvyn.app/#KV7M-9X2P
+    Viewer->>Web: Open https://shellvyn.reck98.in/#KV7M-9X2P
     Web->>Relay: Join { code: "KV7M-9X2P" }
     Relay->>Relay: Check IP rate limit (< 3 failures)
     Relay->>Agent: PairRequest { client_id, remote_ip, user_agent }
@@ -377,7 +377,7 @@ The host agent registers with the signaling service and displays an active sessi
 ║                    SHELLVYN HOST SESSION ACTIVE                      ║
 ╠══════════════════════════════════════════════════════════════════════╣
 ║  Pairing Code  : KV7M-9X2P                                           ║
-║  Web Client    : https://shellvyn.app/#KV7M-9X2P                     ║
+║  Web Client    : https://shellvyn.reck98.in/#KV7M-9X2P                     ║
 ║  Host System   : WORKSTATION-01 (windows)                            ║
 ║  Session Mode  : Interactive                                         ║
 ║  Security      : Zero-Knowledge E2EE (ChaCha20-Poly1305 + HKDF)      ║

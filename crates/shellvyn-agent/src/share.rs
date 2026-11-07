@@ -110,7 +110,7 @@ pub async fn run_share_session(opts: ShareOptions) -> Result<(), Box<dyn std::er
     println!("║                    SHELLVYN HOST SESSION ACTIVE                      ║");
     println!("╠══════════════════════════════════════════════════════════════════════╣");
     println!("║  Pairing Code  : {:<51} ║", display_code);
-    println!("║  Web Client    : https://shellvyn.app/#{:<37} ║", display_code);
+    println!("║  Web Client    : {:<51} ║", format!("https://shellvyn.reck98.in/#{}", display_code));
     println!("║  Host System   : {:<51} ║", format!("{} ({})", hostname, std::env::consts::OS));
     println!("║  Session Mode  : {:<51} ║", if opts.read_only { "Read-Only" } else { "Interactive" });
     println!("║  Security      : Zero-Knowledge E2EE (ChaCha20-Poly1305 + HKDF)      ║");

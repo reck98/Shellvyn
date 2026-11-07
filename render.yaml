@@ -39,6 +39,8 @@ services:
     staticPublishPath: dist
     branch: main
     autoDeploy: true
+    domains:
+      - shellvyn.reck98.in
     headers:
       - path: /*
         name: X-Content-Type-Options

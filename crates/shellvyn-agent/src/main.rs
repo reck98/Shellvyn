@@ -16,9 +16,9 @@ struct Cli {
 enum Commands {
     /// Share your current terminal session via the signaling server
     Share {
-        /// Signaling server URL
-        #[arg(short, long, default_value = "ws://127.0.0.1:8080/ws")]
-        server: String,
+        /// Signaling server URL (overrides SHELLVYN_SERVER env var, default: wss://shellvyn-signaling.onrender.com/ws)
+        #[arg(short, long)]
+        server: Option<String>,
 
         /// Read-only mode (viewers cannot send keystrokes)
         #[arg(long)]
@@ -53,6 +53,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     match cli.command.unwrap_or(Commands::TestPty { shell: "default".into() }) {
         Commands::Share { server, read_only, auto_accept, shell } => {
+            let server_url = server
+                .or_else(|| std::env::var("SHELLVYN_SERVER").ok())
+                .unwrap_or_else(|| "wss://shellvyn-signaling.onrender.com/ws".to_string());
+
             let shell_type = match shell.to_lowercase().as_str() {
                 "cmd" => Some(ShellType::Cmd),
                 "powershell" | "pwsh" => Some(ShellType::PowerShell),
@@ -61,7 +65,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             };
 
             run_share_session(ShareOptions {
-                server_url: server,
+                server_url,
                 read_only,
                 auto_accept,
                 shell: shell_type,

@@ -54,14 +54,14 @@
       <text x="80" y="152" fill="#858d73">(c) Microsoft Corporation. All rights reserved.</text>
       
       <text x="80" y="190">
-        <tspan fill="#86a759">PS C:\Users\aashi\Development\ShellVyn&gt;</tspan> <tspan fill="#f5efe3">shellvyn share --server wss://relay.shellvyn.app/ws</tspan>
+        <tspan fill="#86a759">PS C:\Users\aashi\Development\ShellVyn&gt;</tspan> <tspan fill="#f5efe3">shellvyn share --server wss://shellvyn-signaling.onrender.com/ws</tspan>
       </text>
 
       <text x="80" y="222" fill="#b8892d">╔══════════════════════════════════════════════════════════════════════╗</text>
       <text x="80" y="242" fill="#b8892d">║                    SHELLVYN HOST SESSION ACTIVE                      ║</text>
       <text x="80" y="262" fill="#b8892d">╠══════════════════════════════════════════════════════════════════════╣</text>
       <text x="80" y="282" fill="#b8892d">║  Pairing Code  : <tspan fill="#d4a23d" font-weight="700">KV7M-9X2P</tspan>                                           ║</text>
-      <text x="80" y="302" fill="#b8892d">║  Web Client    : <tspan fill="#f5efe3">https://shellvyn.app/#KV7M-9X2P</tspan>                     ║</text>
+      <text x="80" y="302" fill="#b8892d">║  Web Client    : <tspan fill="#f5efe3">https://shellvyn.reck98.in/#KV7M-9X2P</tspan>                     ║</text>
       <text x="80" y="322" fill="#b8892d">║  Host System   : DESKTOP-SHELLVYN (Windows ConPTY)                   ║</text>
       <text x="80" y="342" fill="#b8892d">║  Security      : <tspan fill="#86a759">Zero-Knowledge E2EE (ChaCha20-Poly1305 + HKDF)</tspan>      ║</text>
       <text x="80" y="362" fill="#b8892d">║  TTL (Expiry)  : 300 seconds                                         ║</text>

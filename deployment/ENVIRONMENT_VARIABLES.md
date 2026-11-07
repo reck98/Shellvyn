@@ -32,7 +32,7 @@ The native agent is driven primarily via CLI arguments (`shellvyn share`, `shell
 
 | Variable | Type | Default | Required? | Description |
 | :--- | :---: | :---: | :---: | :--- |
-| `SHELLVYN_SERVER` | `string` | `ws://127.0.0.1:8080/ws` | Optional | Default signaling server URL when `--server` is not explicitly supplied on the command line. |
+| `SHELLVYN_SERVER` | `string` | `wss://shellvyn-signaling.onrender.com/ws` | Optional | Default signaling server URL when `--server` is not explicitly supplied on the command line. |
 | `COMPUTERNAME` / `HOSTNAME` | `string` | `unknown-host` | Optional | Host machine identification string broadcast in `SignalingMessage::Register`. Injected automatically by Windows and POSIX shells. |
 | `RUST_LOG` | `string` | `info` | Optional | Controls native agent diagnostic logging output. |
 

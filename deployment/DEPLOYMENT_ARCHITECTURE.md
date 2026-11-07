@@ -14,7 +14,7 @@ Shellvyn uses a decoupled, hybrid architecture designed for minimal latency, sec
 flowchart TD
     subgraph Users["Distributed User Machines (No Inbound Ports)"]
         Host["Host Developer Machine\n(Windows ConPTY / Linux openpty)\nshellvyn-agent binary"]
-        Viewer["Remote Viewer Browser\nChrome / Firefox / Edge / Safari\nhttps://shellvyn-web.onrender.com"]
+        Viewer["Remote Viewer Browser\nChrome / Firefox / Edge / Safari\nhttps://shellvyn.reck98.in"]
     end
 
     subgraph Render["Render Cloud Infrastructure"]
@@ -77,7 +77,7 @@ flowchart TD
    - Host sends `SignalingMessage::Register`.
    - Relay registers session in memory with a 5-minute (300s) TTL.
 2. **Viewer Discovery & Pairing**:
-   - Viewer loads `https://shellvyn-web.onrender.com/#KV7M-9X2P`.
+   - Viewer loads `https://shellvyn.reck98.in/#KV7M-9X2P`.
    - Viewer connects outbound to `wss://shellvyn-signaling.onrender.com/ws`.
    - Viewer sends `SignalingMessage::Join { code }`.
 3. **Authorization & Key Exchange**:

@@ -28,3 +28,7 @@ desktop.ini
 .idea/
 *.swp
 *.swo
+
+# Agent tooling
+.agents/
+skills-lock.json
