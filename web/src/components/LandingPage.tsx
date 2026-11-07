@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Sun,
   Moon,
@@ -79,6 +79,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onOpenArchitecture,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [releaseVersion, setReleaseVersion] = useState('v0.1.4');
+
+  // Fetch the latest release tag from GitHub dynamically
+  useEffect(() => {
+    fetch('https://api.github.com/repos/reck98/Shellvyn/releases/latest')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.tag_name) {
+          setReleaseVersion(data.tag_name);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Ensure initial load starts at the top (Hero / Overview) rather than jumping down to console
   React.useEffect(() => {
@@ -106,9 +119,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             >
               <ShellvynLogo symbolSize="w-6 h-6" />
             </a>
-            <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-medium rounded bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-muted)] select-none">
-              v0.1.0
-            </span>
+            <a
+              href="https://github.com/reck98/Shellvyn/releases/latest"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-medium rounded bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition select-none"
+              title="View latest GitHub release"
+            >
+              {releaseVersion}
+            </a>
           </div>
 
           {/* Desktop Anchor Navigation */}
