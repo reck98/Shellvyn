@@ -19,9 +19,9 @@ import {
   CheckCircle2,
   Menu,
   X,
-  ExternalLink,
+  ArrowUpRight,
 } from 'lucide-react';
-import { ShellvynLogo, ShellvynSymbol } from './ShellvynLogo';
+import { ShellvynLogo } from './ShellvynLogo';
 
 interface LandingPageProps {
   pairingCode: string;
@@ -800,6 +800,95 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
           </div>
         </div>
+
+        {/* Architecture Flow Schematic & Archify Documentation Callout */}
+        <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] rounded-xl p-5 sm:p-7 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-4">
+            <div>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--accent)] font-semibold">
+                Dataflow & Cryptographic Boundary
+              </span>
+              <h3 className="text-sm font-semibold text-[var(--text-primary)]">
+                End-to-End Encrypted Relay Topology
+              </h3>
+            </div>
+            <span className="text-[11px] font-mono text-[var(--text-muted)] bg-[var(--bg-canvas)] px-2.5 py-1 rounded border border-[var(--border-default)] self-start sm:self-auto">
+              Zero Plaintext Exposure
+            </span>
+          </div>
+
+          {/* 3 Nodes Schematic */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+            <div className="p-4 rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-default)] space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-[var(--text-primary)]">Host Endpoint</span>
+                <span className="text-[10px] text-[var(--accent)] bg-[var(--accent)]/10 px-1.5 py-0.5 rounded">
+                  Native PTY
+                </span>
+              </div>
+              <p className="text-[11px] text-[var(--text-secondary)] font-sans leading-normal">
+                Local Windows ConPTY or Linux POSIX. ChaCha20-Poly1305 symmetric cipher encrypts keystrokes and raw PTY screen updates.
+              </p>
+              <div className="text-[10px] text-[var(--text-muted)] pt-1 border-t border-[var(--border-subtle)]">
+                Key never leaves endpoints
+              </div>
+            </div>
+
+            <div className="p-4 rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-default)] space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-[var(--text-primary)]">Signaling Relay</span>
+                <span className="text-[10px] text-[var(--gold)] bg-[var(--gold)]/10 px-1.5 py-0.5 rounded">
+                  Blinded Axum
+                </span>
+              </div>
+              <p className="text-[11px] text-[var(--text-secondary)] font-sans leading-normal">
+                Stateless WebSocket relay on Render. Forwards ciphertext frames via memory channels. Has zero access to decryption keys.
+              </p>
+              <div className="text-[10px] text-[var(--text-muted)] pt-1 border-t border-[var(--border-subtle)]">
+                WebRTC direct P2P planned
+              </div>
+            </div>
+
+            <div className="p-4 rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-default)] space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-[var(--text-primary)]">Browser Guest</span>
+                <span className="text-[10px] text-[var(--accent)] bg-[var(--accent)]/10 px-1.5 py-0.5 rounded">
+                  xterm.js
+                </span>
+              </div>
+              <p className="text-[11px] text-[var(--text-secondary)] font-sans leading-normal">
+                Web Crypto API decrypts frames locally using the session key. Canvas renders VT100/ANSI sequences with sub-15ms latency.
+              </p>
+              <div className="text-[10px] text-[var(--text-muted)] pt-1 border-t border-[var(--border-subtle)]">
+                Zero guest installation
+              </div>
+            </div>
+          </div>
+
+          {/* Prominent Link to https://shellvyn.reck98.in/architecture */}
+          <div className="pt-4 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[var(--bg-canvas)]/60 p-4 sm:p-5 rounded-lg border border-[var(--border-default)]">
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <Layers className="w-4 h-4 text-[var(--accent)] shrink-0" />
+                <h4 className="text-sm font-semibold text-[var(--text-primary)]">
+                  Explore Full System Architecture
+                </h4>
+              </div>
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed max-w-xl">
+                Interactive architecture specifications detailing the cryptographic handshake, Crockford Base32 session exchange, Axum relay routing, and future WebRTC direct data channels.
+              </p>
+            </div>
+            <a
+              href="https://shellvyn.reck98.in/architecture"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] text-xs font-mono font-medium text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-all shrink-0 cursor-pointer shadow-xs active:scale-95 group"
+            >
+              <span>System Architecture</span>
+              <ArrowUpRight className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </a>
+          </div>
+        </div>
       </section>
 
       {/* ====================================================================
@@ -917,62 +1006,62 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* ====================================================================
-          7. Footer — Strict Requirements
-          Contains:
-          1. Exact text: "Made with ❤️ by reck98" linking to https://github.com/reck98
-          2. GitHub repository link and icon pointing to https://github.com/reck98/Shellvyn
-          3. Clean, restrained, single/two-row developer footer.
+          7. Footer — Strict Specification (Phase 7)
+          Structure:
+          - Two centered, pill-shaped links side-by-side on desktop (stacked on narrow mobile):
+            1. System Architecture -> https://shellvyn.reck98.in/architecture
+            2. GitHub Repository -> https://github.com/reck98/Shellvyn
+          - Attribution centered below the pills:
+            "Made with ❤️ by reck98" (reck98 -> https://github.com/reck98)
+          - Subtle secondary metadata below attribution
           ==================================================================== */}
-      <footer className="mt-auto border-t border-[var(--border-default)] bg-[var(--bg-subtle)]/50 transition-colors">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs font-mono text-[var(--text-muted)]">
-          {/* Brand & Creator Credit */}
-          <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 text-center sm:text-left">
-            <div className="flex items-center space-x-2">
-              <ShellvynSymbol className="w-4 h-4 shrink-0" />
-              <span className="font-bold text-[var(--text-primary)]">Shellvyn</span>
-            </div>
-            <span className="hidden sm:inline text-[var(--border-default)]">&bull;</span>
-            <span className="text-[var(--text-secondary)]">
-              Made with ❤️ by{' '}
-              <a
-                href="https://github.com/reck98"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[var(--text-primary)] font-medium hover:underline hover:text-[var(--accent)] focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] rounded transition-colors"
-              >
-                reck98
-              </a>
-            </span>
-          </div>
+      <footer className="mt-auto border-t border-[var(--border-default)] bg-[var(--bg-subtle)]/40 transition-colors">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-16 flex flex-col items-center justify-center space-y-6">
+          {/* Two centered, pill-shaped links */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3.5 w-full sm:w-auto">
+            {/* 1. System Architecture Pill */}
+            <a
+              href="https://shellvyn.reck98.in/architecture"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Shellvyn System Architecture documentation"
+              className="inline-flex items-center justify-center space-x-2.5 px-5 py-2.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] text-xs font-mono font-medium text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-all cursor-pointer shadow-xs active:scale-[0.98] group"
+            >
+              <Layers className="w-4 h-4 text-[var(--accent)] shrink-0" />
+              <span>System Architecture</span>
+              <ArrowUpRight className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+            </a>
 
-          {/* GitHub Repository Link & Licensing */}
-          <div className="flex items-center space-x-4">
+            {/* 2. GitHub Repository Pill */}
             <a
               href="https://github.com/reck98/Shellvyn"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Shellvyn GitHub repository"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-md border border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] active:scale-95"
+              className="inline-flex items-center justify-center space-x-2.5 px-5 py-2.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] text-xs font-mono font-medium text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-all cursor-pointer shadow-xs active:scale-[0.98] group"
             >
-              <GithubIcon className="w-3.5 h-3.5" />
-              <span>GitHub</span>
-              <ExternalLink className="w-3 h-3 text-[var(--text-muted)]" />
+              <GithubIcon className="w-4 h-4 shrink-0" />
+              <span>GitHub Repository</span>
+              <ArrowUpRight className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </a>
+          </div>
 
-            <span className="text-[var(--border-default)]">&bull;</span>
-
-            <a
-              href="https://github.com/reck98/Shellvyn/releases"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-[var(--text-primary)] transition focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] rounded"
-            >
-              Releases
-            </a>
-
-            <span className="text-[var(--border-default)]">&bull;</span>
-
-            <span className="hidden md:inline">MIT OR Apache-2.0</span>
+          {/* Centered Attribution */}
+          <div className="flex flex-col items-center justify-center space-y-2 text-center">
+            <p className="text-xs font-mono text-[var(--text-secondary)]">
+              Made with ❤️ by{' '}
+              <a
+                href="https://github.com/reck98"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--text-primary)] font-semibold hover:text-[var(--accent)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--border-focus)] rounded transition-colors"
+              >
+                reck98
+              </a>
+            </p>
+            <p className="text-[11px] font-mono text-[var(--text-muted)]">
+              Shellvyn &bull; Dual-licensed under MIT and Apache-2.0
+            </p>
           </div>
         </div>
       </footer>
