@@ -119,6 +119,7 @@ pub async fn run_share_session(opts: ShareOptions) -> Result<(), Box<dyn std::er
     println!("║  Web Client    : {:<51} ║", format!("https://shellvyn.reck98.in/#{}", display_code));
     println!("║  Host System   : {:<51} ║", format!("{} ({})", hostname, std::env::consts::OS));
     println!("║  Session Mode  : {:<51} ║", if opts.read_only { "Read-Only" } else { "Interactive" });
+    println!("║  Approval Mode : {:<51} ║", if opts.auto_accept { "Auto-Approve" } else { "Manual Approval Required" });
     println!("║  Security      : Zero-Knowledge E2EE (ChaCha20-Poly1305 + HKDF)      ║");
     println!("║  TTL (Expiry)  : {:<51} ║", format!("{} seconds", expires_in));
     println!("╚══════════════════════════════════════════════════════════════════════╝");
@@ -229,7 +230,7 @@ pub async fn run_share_session(opts: ShareOptions) -> Result<(), Box<dyn std::er
                                     println!("[Shellvyn] Auto-accept enabled. Connection approved.");
                                     true
                                 } else {
-                                    print!("[Shellvyn] Approve connection from {} ({})? [y/N]: ", remote_ip, user_agent);
+                                    print!("[Shellvyn] Approve incoming connection from {}? [y/N]: ", remote_ip);
                                     let _ = std::io::stdout().flush();
 
                                     let (prompt_tx, prompt_rx) = tokio::sync::oneshot::channel();
@@ -244,9 +245,12 @@ pub async fn run_share_session(opts: ShareOptions) -> Result<(), Box<dyn std::er
                                     });
 
                                     match timeout(Duration::from_secs(30), prompt_rx).await {
-                                        Ok(Ok(decision)) => decision,
+                                        Ok(Ok(true)) => {
+                                            println!("[Shellvyn] Connection approved.");
+                                            true
+                                        }
                                         _ => {
-                                            println!("\n[Shellvyn] Approval timed out or declined. Connection rejected.");
+                                            println!("\n[Shellvyn] Approval declined or timed out. Connection rejected.");
                                             false
                                         }
                                     }

@@ -24,8 +24,8 @@ enum Commands {
         #[arg(long)]
         read_only: bool,
 
-        /// Automatically approve incoming viewer connection requests
-        #[arg(long, default_value_t = true)]
+        /// Automatically approve incoming viewer connection requests (default: manual prompt required)
+        #[arg(long, default_value_t = false)]
         auto_accept: bool,
 
         /// Shell to launch: powershell, cmd, bash, or default
