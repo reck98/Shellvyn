@@ -5331,7 +5331,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
         <!-- Participants -->
         <g id="node-host_dev" data-node-id="host_dev" data-node-label="Host Developer" tabindex="0" role="button" aria-label="Focus Host Developer, Ctrl+C / exit, Sequence participant" aria-pressed="false" data-node-kind="external" data-node-sublabel="Ctrl+C / exit" data-node-context="Sequence participant">
-          <title>Host Developer · Ctrl+C / exit · Sequence participant</title>
+          
           <rect x="62" y="72" width="167" height="60" rx="6" class="c-mask"/>
           <rect x="62" y="72" width="167" height="60" rx="6" class="c-external" data-animate="node" style="--step:0" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(68 78) scale(0.6875)">
@@ -5343,7 +5343,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
 
         <g id="node-host_cli" data-node-id="host_cli" data-node-label="Host CLI Agent" tabindex="0" role="button" aria-label="Focus Host CLI Agent, crates/shellvyn-agent, Sequence participant" aria-pressed="false" data-node-kind="backend" data-node-sublabel="crates/shellvyn-agent" data-node-context="Sequence participant">
-          <title>Host CLI Agent · crates/shellvyn-agent · Sequence participant</title>
+          
           <rect x="264.75" y="72" width="167" height="60" rx="6" class="c-mask"/>
           <rect x="264.75" y="72" width="167" height="60" rx="6" class="c-backend" data-animate="node" style="--step:1" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(270.75 78) scale(0.6875)">
@@ -5354,7 +5354,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
 
         <g id="node-relay_srv" data-node-id="relay_srv" data-node-label="Signaling Relay" tabindex="0" role="button" aria-label="Focus Signaling Relay, Axum Service, Sequence participant" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="Axum Service" data-node-context="Sequence participant">
-          <title>Signaling Relay · Axum Service · Sequence participant</title>
+          
           <rect x="467.5" y="72" width="167" height="60" rx="6" class="c-mask"/>
           <rect x="467.5" y="72" width="167" height="60" rx="6" class="c-cloud" data-animate="node" style="--step:2" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(473.5 78) scale(0.6875)">
@@ -5365,7 +5365,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
 
         <g id="node-guest_app" data-node-id="guest_app" data-node-label="Guest Web App" tabindex="0" role="button" aria-label="Focus Guest Web App, React / xterm, Sequence participant" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="React / xterm" data-node-context="Sequence participant">
-          <title>Guest Web App · React / xterm · Sequence participant</title>
+          
           <rect x="670.25" y="72" width="167" height="60" rx="6" class="c-mask"/>
           <rect x="670.25" y="72" width="167" height="60" rx="6" class="c-frontend" data-animate="node" style="--step:3" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(676.25 78) scale(0.6875)">
@@ -5379,7 +5379,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
 
         <g id="node-pty_proc" data-node-id="pty_proc" data-node-label="PTY Process" tabindex="0" role="button" aria-label="Focus PTY Process, PowerShell / Bash, Sequence participant" aria-pressed="false" data-node-kind="backend" data-node-sublabel="PowerShell / Bash" data-node-context="Sequence participant">
-          <title>PTY Process · PowerShell / Bash · Sequence participant</title>
+          
           <rect x="873" y="72" width="167" height="60" rx="6" class="c-mask"/>
           <rect x="873" y="72" width="167" height="60" rx="6" class="c-backend" data-animate="node" style="--step:4" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(879 78) scale(0.6875)">
@@ -9222,9 +9222,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
             label: record.label
           });
           target.setAttribute('aria-label', description);
-          var title = document.createElementNS(svgNamespace, 'title');
-          title.textContent = record.fromLabel + ' \u2192 ' + record.toLabel + ' \u00b7 ' + record.label;
-          target.appendChild(title);
+          // Omit appending SVG <title> to avoid intrusive browser-native black hover tooltips on edges
           record.shapes.forEach(function (shape) {
             target.appendChild(relationshipHitGeometry(shape));
             target.appendChild(relationshipHitGeometry(shape, 'relationship-focus-rail'));

@@ -5280,7 +5280,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
         <!-- Components -->
         <g id="node-pty_kernel" data-node-id="pty_kernel" data-node-label="Local PTY &amp; Shell" tabindex="0" role="button" aria-label="Focus Local PTY &amp; Shell, Full OS privileges, Host Trusted Execution Zone" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Full OS privileges" data-node-tag="Privileged Zone" data-node-context="Host Trusted Execution Zone">
-          <title>Local PTY &amp; Shell · Full OS privileges · Host Trusted Execution Zone · Privileged Zone</title>
+          
           <rect x="40" y="220" width="150" height="64" rx="8" class="c-mask"/>
           <rect x="40" y="220" width="150" height="64" rx="8" class="c-backend" data-animate="node" style="--step:0" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(46 226) scale(0.6875)">
@@ -5292,7 +5292,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
 
         <g id="node-host_guard" data-node-id="host_guard" data-node-label="Authorization Guard" tabindex="0" role="button" aria-label="Focus Authorization Guard, Consent gate [y/N], Host Trusted Execution Zone" aria-pressed="false" data-node-kind="security" data-node-sublabel="Consent gate [y/N]" data-node-tag="Host Firewall" data-node-context="Host Trusted Execution Zone">
-          <title>Authorization Guard · Consent gate [y/N] · Host Trusted Execution Zone · Host Firewall</title>
+          
           <rect x="240" y="220" width="150" height="64" rx="8" class="c-mask"/>
           <rect x="240" y="220" width="150" height="64" rx="8" class="c-security" data-animate="node" style="--step:1" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(246 226) scale(0.6875)">
@@ -5305,7 +5305,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
 
         <g id="node-host_cipher" data-node-id="host_cipher" data-node-label="Host Cipher Boundary" tabindex="0" role="button" aria-label="Focus Host Cipher Boundary, ChaCha20-Poly1305, Host Trusted Execution Zone" aria-pressed="false" data-node-kind="security" data-node-sublabel="ChaCha20-Poly1305" data-node-tag="Encrypt Out" data-node-context="Host Trusted Execution Zone">
-          <title>Host Cipher Boundary · ChaCha20-Poly1305 · Host Trusted Execution Zone · Encrypt Out</title>
+          
           <rect x="240" y="340" width="150" height="64" rx="8" class="c-mask"/>
           <rect x="240" y="340" width="150" height="64" rx="8" class="c-security" data-animate="node" style="--step:2" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(246 346) scale(0.6875)">
@@ -5318,7 +5318,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
 
         <g id="node-cloud_relay" data-node-id="cloud_relay" data-node-label="Untrusted Relay Host" tabindex="0" role="button" aria-label="Focus Untrusted Relay Host, Public cloud (Render), Public Blinded Relay Zone (Zero Knowledge)" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="Public cloud (Render)" data-node-tag="Zero-Trust Relay" data-node-context="Public Blinded Relay Zone (Zero Knowledge)">
-          <title>Untrusted Relay Host · Public cloud (Render) · Public Blinded Relay Zone (Zero Knowledge) · Zero-Trust Relay</title>
+          
           <rect x="490" y="220" width="160" height="64" rx="8" class="c-mask"/>
           <rect x="490" y="220" width="160" height="64" rx="8" class="c-cloud" data-animate="node" style="--step:3" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(496 226) scale(0.6875)">
@@ -5330,7 +5330,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
 
         <g id="node-guest_cipher" data-node-id="guest_cipher" data-node-label="Guest Cipher Boundary" tabindex="0" role="button" aria-label="Focus Guest Cipher Boundary, Client-side Decrypt, Browser Guest Sandboxed Zone" aria-pressed="false" data-node-kind="security" data-node-sublabel="Client-side Decrypt" data-node-tag="Decrypt In" data-node-context="Browser Guest Sandboxed Zone">
-          <title>Guest Cipher Boundary · Client-side Decrypt · Browser Guest Sandboxed Zone · Decrypt In</title>
+          
           <rect x="740" y="340" width="150" height="64" rx="8" class="c-mask"/>
           <rect x="740" y="340" width="150" height="64" rx="8" class="c-security" data-animate="node" style="--step:4" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(746 346) scale(0.6875)">
@@ -5343,7 +5343,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
 
         <g id="node-browser_sandbox" data-node-id="browser_sandbox" data-node-label="Browser DOM Sandbox" tabindex="0" role="button" aria-label="Focus Browser DOM Sandbox, Restricted JS Context, Browser Guest Sandboxed Zone" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Restricted JS Context" data-node-tag="Isolated Client" data-node-context="Browser Guest Sandboxed Zone">
-          <title>Browser DOM Sandbox · Restricted JS Context · Browser Guest Sandboxed Zone · Isolated Client</title>
+          
           <rect x="740" y="220" width="150" height="64" rx="8" class="c-mask"/>
           <rect x="740" y="220" width="150" height="64" rx="8" class="c-frontend" data-animate="node" style="--step:5" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(746 226) scale(0.6875)">
@@ -9228,9 +9228,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
             label: record.label
           });
           target.setAttribute('aria-label', description);
-          var title = document.createElementNS(svgNamespace, 'title');
-          title.textContent = record.fromLabel + ' \u2192 ' + record.toLabel + ' \u00b7 ' + record.label;
-          target.appendChild(title);
+          // Omit appending SVG <title> to avoid intrusive browser-native black hover tooltips on edges
           record.shapes.forEach(function (shape) {
             target.appendChild(relationshipHitGeometry(shape));
             target.appendChild(relationshipHitGeometry(shape, 'relationship-focus-rail'));
