@@ -78,6 +78,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Ensure initial load starts at the top (Hero / Overview) rather than jumping down to console
+  React.useEffect(() => {
+    if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#overview') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+  }, []);
+
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
@@ -352,7 +359,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                           onChange={(e) => setPairingCode(normalizePairingCode(e.target.value))}
                           placeholder="XXXX-XXXX"
                           maxLength={9}
-                          autoFocus
                           autoComplete="off"
                           spellCheck={false}
                           className="w-full h-12 bg-[var(--bg-canvas)] border border-[var(--border-default)] focus:border-[var(--border-focus)] rounded-lg text-center text-xl font-mono tracking-widest text-[var(--text-primary)] focus:outline-none transition placeholder:text-[var(--text-muted)] uppercase"
