@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy workspace configuration and lockfile for dependency caching
-COPY Cargo.toml Cargo.lock ./
+COPY Cargo.toml Cargo.lock* ./
 COPY crates/shellvyn-core/Cargo.toml crates/shellvyn-core/Cargo.toml
 COPY crates/shellvyn-pty/Cargo.toml crates/shellvyn-pty/Cargo.toml
 COPY crates/shellvyn-signaling/Cargo.toml crates/shellvyn-signaling/Cargo.toml
