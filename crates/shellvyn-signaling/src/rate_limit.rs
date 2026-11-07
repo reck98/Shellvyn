@@ -7,8 +7,15 @@ use std::net::IpAddr;
 use std::time::{Duration, Instant};
 use tracing::warn;
 
-pub const MAX_FAILED_ATTEMPTS: usize = 3;
-pub const LOCKOUT_DURATION: Duration = Duration::from_secs(15 * 60); // 15 minutes
+pub const MAX_FAILED_ATTEMPTS: usize = 5;
+pub const LOCKOUT_DURATION: Duration = Duration::from_secs(5 * 60); // 5 minutes
+
+fn is_private_ip(ip: &IpAddr) -> bool {
+    match ip {
+        IpAddr::V4(v4) => v4.is_private() || v4.is_link_local(),
+        IpAddr::V6(v6) => v6.is_unique_local(),
+    }
+}
 
 #[derive(Default)]
 pub struct RateLimiter {
@@ -24,6 +31,11 @@ impl RateLimiter {
 
     /// Checks if the given IP address is currently locked out.
     pub fn is_locked_out(&self, ip: &IpAddr) -> bool {
+        // Never lock out private / internal cloud proxy networks
+        if is_private_ip(ip) {
+            return false;
+        }
+
         let now = Instant::now();
         if let Some(mut attempts) = self.failed_attempts.get_mut(ip) {
             // Evict attempts older than the lockout window
@@ -38,6 +50,10 @@ impl RateLimiter {
 
     /// Records a failed pairing attempt for the given IP address.
     pub fn record_failure(&self, ip: IpAddr) {
+        if is_private_ip(&ip) {
+            return;
+        }
+
         let now = Instant::now();
         let mut entry = self.failed_attempts.entry(ip).or_default();
         entry.retain(|&time| now.duration_since(time) < LOCKOUT_DURATION);
@@ -58,19 +74,22 @@ mod tests {
     #[test]
     fn test_rate_limiter_lockout() {
         let limiter = RateLimiter::new();
-        let ip = IpAddr::V4(Ipv4Addr::new(192, 168, 1, 100));
+        let ip = IpAddr::V4(Ipv4Addr::new(93, 184, 216, 34)); // public IP (example.com)
 
         assert!(!limiter.is_locked_out(&ip));
 
-        limiter.record_failure(ip);
-        assert!(!limiter.is_locked_out(&ip));
-
-        limiter.record_failure(ip);
-        assert!(!limiter.is_locked_out(&ip));
-
-        limiter.record_failure(ip);
-        // Third failure triggers lockout
+        for _ in 0..MAX_FAILED_ATTEMPTS {
+            limiter.record_failure(ip);
+        }
+        // Triggers lockout
         assert!(limiter.is_locked_out(&ip));
+
+        // Private IP should never be locked out
+        let private_ip = IpAddr::V4(Ipv4Addr::new(192, 168, 1, 100));
+        for _ in 0..MAX_FAILED_ATTEMPTS + 5 {
+            limiter.record_failure(private_ip);
+        }
+        assert!(!limiter.is_locked_out(&private_ip));
 
         // Successful authentication clears failures
         limiter.record_success(&ip);

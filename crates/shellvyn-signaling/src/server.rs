@@ -12,7 +12,7 @@ use futures_util::{SinkExt, StreamExt};
 use rand::rngs::OsRng;
 use rand::RngCore;
 use shellvyn_core::protocol::{ConnectionMode, JoinStatus, SignalingMessage};
-use std::net::SocketAddr;
+use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tracing::{debug, warn};
@@ -41,16 +41,43 @@ async fn health_handler() -> impl IntoResponse {
     }))
 }
 
+fn extract_client_ip(headers: &axum::http::HeaderMap, addr: SocketAddr) -> IpAddr {
+    // 1. Try CF-Connecting-IP (Cloudflare)
+    if let Some(cf_ip) = headers.get("cf-connecting-ip").and_then(|v| v.to_str().ok()) {
+        if let Ok(parsed) = cf_ip.trim().parse::<IpAddr>() {
+            return parsed;
+        }
+    }
+    // 2. Try X-Forwarded-For (Render / reverse proxy - first entry is client IP)
+    if let Some(xff) = headers.get("x-forwarded-for").and_then(|v| v.to_str().ok()) {
+        if let Some(first) = xff.split(',').next() {
+            if let Ok(parsed) = first.trim().parse::<IpAddr>() {
+                return parsed;
+            }
+        }
+    }
+    // 3. Try X-Real-IP
+    if let Some(real_ip) = headers.get("x-real-ip").and_then(|v| v.to_str().ok()) {
+        if let Ok(parsed) = real_ip.trim().parse::<IpAddr>() {
+            return parsed;
+        }
+    }
+    // 4. Fallback to direct TCP socket IP
+    addr.ip()
+}
+
 async fn ws_handler(
     ws: WebSocketUpgrade,
+    headers: axum::http::HeaderMap,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     State(state): State<SignalingState>,
 ) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| handle_connection(socket, addr, state))
+    let client_ip = extract_client_ip(&headers, addr);
+    ws.on_upgrade(move |socket| handle_connection(socket, client_ip, state))
 }
 
-async fn handle_connection(socket: WebSocket, addr: SocketAddr, state: SignalingState) {
-    debug!(ip = %addr.ip(), "Incoming WebSocket connection on signaling server");
+async fn handle_connection(socket: WebSocket, client_ip: IpAddr, state: SignalingState) {
+    debug!(ip = %client_ip, "Incoming WebSocket connection on signaling server");
 
     let (mut ws_sender, mut ws_receiver) = socket.split();
     let (tx_to_client, mut rx_to_client) = mpsc::unbounded_channel::<SignalingMessage>();
@@ -66,7 +93,6 @@ async fn handle_connection(socket: WebSocket, addr: SocketAddr, state: Signaling
         }
     });
 
-    let client_ip = addr.ip();
     let mut current_host_id: Option<String> = None;
     let mut current_client_id: Option<String> = None;
 
@@ -277,5 +303,5 @@ async fn handle_connection(socket: WebSocket, addr: SocketAddr, state: Signaling
         state.registry.remove_viewer(&c_id);
     }
 
-    debug!(ip = %addr.ip(), "Signaling WebSocket connection closed");
+    debug!(ip = %client_ip, "Signaling WebSocket connection closed");
 }

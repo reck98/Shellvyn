@@ -168,6 +168,15 @@ export const App: React.FC = () => {
     ws.binaryType = 'arraybuffer';
     socketRef.current = ws;
 
+    const heartbeatTimer = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'heartbeat',
+          timestamp: Math.floor(Date.now() / 1000),
+        }));
+      }
+    }, 15000);
+
     ws.onopen = () => {
       if (isRemote && codeForE2ee) {
         ws.send(JSON.stringify({
@@ -258,10 +267,12 @@ export const App: React.FC = () => {
     };
 
     ws.onclose = () => {
+      clearInterval(heartbeatTimer);
       setConnState('disconnected');
     };
 
     ws.onerror = () => {
+      clearInterval(heartbeatTimer);
       setDisconnectReason('Unable to establish WebSocket connection with signaling server');
       setConnState('disconnected');
     };
@@ -302,6 +313,19 @@ export const App: React.FC = () => {
     const signalingUrl = getSignalingUrl();
     connectWebSocket(signalingUrl, true, normalized);
   };
+
+  // Pre-fill and auto-connect if pairing code is present in URL hash
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const rawHash = window.location.hash.replace(/^#\/?/, '').trim();
+      if (rawHash && rawHash !== 'overview' && rawHash !== 'architecture-gallery' && isValidPairingCode(rawHash)) {
+        const normalized = normalizePairingCode(rawHash);
+        setPairingCode(normalized);
+        const signalingUrl = getSignalingUrl();
+        connectWebSocket(signalingUrl, true, normalized);
+      }
+    }
+  }, [connectWebSocket, getSignalingUrl]);
 
   const handleDisconnect = () => {
     if (socketRef.current) {

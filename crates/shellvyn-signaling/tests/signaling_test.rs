@@ -142,8 +142,8 @@ async fn test_rate_limiter_lockout_on_invalid_code() {
     let ws_url = format!("ws://127.0.0.1:{}/ws", port);
     let (mut ws, _) = connect_async(&ws_url).await.unwrap();
 
-    // Attempt 3 invalid codes
-    for _ in 0..3 {
+    // Attempt 5 invalid codes
+    for _ in 0..5 {
         let invalid_join = SignalingMessage::Join {
             code: "0000-0000".into(),
         };
@@ -163,11 +163,11 @@ async fn test_rate_limiter_lockout_on_invalid_code() {
         }
     }
 
-    // 4th attempt should be blocked by Rate Limiter!
-    let fourth_join = SignalingMessage::Join {
+    // 6th attempt should be blocked by Rate Limiter!
+    let next_join = SignalingMessage::Join {
         code: "0000-0000".into(),
     };
-    ws.send(Message::Text(serde_json::to_string(&fourth_join).unwrap().into()))
+    ws.send(Message::Text(serde_json::to_string(&next_join).unwrap().into()))
         .await
         .unwrap();
 

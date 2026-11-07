@@ -3,6 +3,17 @@
 All notable changes to the Shellvyn platform will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-11-07
+
+### Fixed
+- Fixed reverse proxy client IP resolution in signaling server:
+  - Extracted true client IP from `CF-Connecting-IP`, `X-Forwarded-For`, and `X-Real-IP`.
+  - Excluded internal private cloud networks (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`) from rate limiter lockout so cloud reverse proxies are never blocked.
+  - Adjusted rate limiter threshold to 5 attempts with 5-minute lockout window.
+- Fixed idle connection drops via 15-second bidirectional keep-alive heartbeats in both host agent and web client.
+- Fixed web client URL hash auto-join so opening `https://shellvyn.reck98.in/#XXXX-XXXX` automatically pre-fills code and connects.
+- Ensured signaling connection errors and status codes are explicitly printed to host terminal.
+
 ## [0.1.2] - 2026-11-07
 
 ### Fixed

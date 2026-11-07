@@ -18,7 +18,7 @@ use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::protocol::frame::coding::CloseCode;
 use tokio_tungstenite::tungstenite::protocol::CloseFrame;
 use tokio_tungstenite::tungstenite::Message;
-use tracing::{debug, error, info, warn};
+use tracing::{debug, info, warn};
 
 #[derive(Debug, Clone)]
 pub struct ShareOptions {
@@ -171,12 +171,25 @@ pub async fn run_share_session(opts: ShareOptions) -> Result<(), Box<dyn std::er
         }
     });
 
+    let mut heartbeat_interval = tokio::time::interval(Duration::from_secs(15));
+    heartbeat_interval.tick().await; // consume initial immediate tick
+
     let shutdown_fut = crate::shutdown_signal();
     tokio::pin!(shutdown_fut);
 
     // Listen for incoming messages from signaling server or termination signal
     let exit_reason = loop {
         tokio::select! {
+            _ = heartbeat_interval.tick() => {
+                let now_ts = std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .map(|d| d.as_secs())
+                    .unwrap_or(0);
+                let ping = SignalingMessage::Heartbeat { timestamp: now_ts };
+                if let Ok(json) = serde_json::to_string(&ping) {
+                    let _ = tx_to_ws.send(Message::Text(json.into()));
+                }
+            }
             _ = &mut shutdown_fut => {
                 println!();
                 println!("[Shellvyn] Termination signal received (Ctrl+C). Initiating graceful shutdown...");
@@ -191,7 +204,7 @@ pub async fn run_share_session(opts: ShareOptions) -> Result<(), Box<dyn std::er
                 let msg = match msg_result {
                     Ok(m) => m,
                     Err(e) => {
-                        warn!("WebSocket read error: {}", e);
+                        println!("\n[Shellvyn] Signaling connection error: {}", e);
                         break "WebSocket read error";
                     }
                 };
@@ -302,8 +315,8 @@ pub async fn run_share_session(opts: ShareOptions) -> Result<(), Box<dyn std::er
                             }
 
                             Ok(SignalingMessage::Error { code, message }) => {
-                                error!(code = %code, message = %message, "Signaling error received");
-                                if code == "HOST_DISCONNECTED" || code == "SESSION_EXPIRED" {
+                                println!("\n[Shellvyn] Signaling error received from server [{}]: {}", code, message);
+                                if code == "HOST_DISCONNECTED" || code == "SESSION_EXPIRED" || code == "RATE_LIMITED" {
                                     break "Session expired or disconnected";
                                 }
                             }
