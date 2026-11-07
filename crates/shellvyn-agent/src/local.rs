@@ -47,7 +47,10 @@ pub async fn run_local_server(port: u16) -> Result<(), Box<dyn std::error::Error
     println!("===============================================================");
     println!();
 
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app)
+        .with_graceful_shutdown(crate::shutdown_signal())
+        .await?;
+    println!("\n[Shellvyn] Local server stopped cleanly.");
     Ok(())
 }
 

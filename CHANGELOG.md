@@ -3,7 +3,18 @@
 All notable changes to the Shellvyn platform will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2026-11-07
+## [0.1.1] - 2026-11-07
+
+### Added
+- Graceful shutdown lifecycle in `shellvyn share` host agent:
+  - Intercepts `Ctrl+C` (`SIGINT`) and `SIGTERM` across platforms.
+  - Automatically notifies active viewer with encrypted `Frame::Close` payload before disconnecting.
+  - Sends clean WebSocket `CloseFrame::Normal` to the signaling server to unregister session immediately.
+  - Safely terminates child PTY terminal process and releases all Win32 handles / POSIX file descriptors.
+  - Added graceful shutdown to `shellvyn local` loopback server via Axum's `with_graceful_shutdown`.
+- Full TLS WebSocket (`wss://`) support using `rustls-tls-native-roots` and the `ring` crypto provider.
+
+## [0.1.0] - 2026-11-07
 
 ### Added
 - Redesigned Web Client Interface (Taste Design Overhaul):

@@ -10,11 +10,13 @@ use shellvyn_core::pairing::generate_pairing_code;
 use shellvyn_core::protocol::{HostOs, SessionPermission, SignalingMessage};
 use shellvyn_pty::{spawn_terminal, ShellType, Winsize};
 use std::io::Write;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio::time::timeout;
 use tokio_tungstenite::connect_async;
+use tokio_tungstenite::tungstenite::protocol::frame::coding::CloseCode;
+use tokio_tungstenite::tungstenite::protocol::CloseFrame;
 use tokio_tungstenite::tungstenite::Message;
 use tracing::{debug, error, info, warn};
 
@@ -118,11 +120,12 @@ pub async fn run_share_session(opts: ShareOptions) -> Result<(), Box<dyn std::er
     println!("╚══════════════════════════════════════════════════════════════════════╝");
     println!();
     println!("Status: Session registered. Waiting for incoming viewer connection...");
+    println!("        (Press Ctrl+C at any time to disconnect and exit)");
 
     // Spawn PTY terminal
     let shell_type = opts.shell.unwrap_or_else(ShellType::default_for_os);
     let (pty_session, mut pty_rx) = spawn_terminal(shell_type, Winsize { cols: 80, rows: 24 })?;
-    let pty_session = Arc::new(pty_session);
+    let pty_session = Arc::new(Mutex::new(pty_session));
 
     let (tx_to_ws, mut rx_to_ws) = mpsc::unbounded_channel::<Message>();
 
@@ -139,16 +142,18 @@ pub async fn run_share_session(opts: ShareOptions) -> Result<(), Box<dyn std::er
     let key_clone = Arc::clone(&session_key);
     let tx_ws_clone = tx_to_ws.clone();
     let host_ident = format!("host-{}", &pairing_code[0..4]);
+    let viewer_rx_stream = viewer_rx.clone();
+    let host_ident_stream = host_ident.clone();
 
     // Stream PTY output -> Connected Viewer
     let pty_stream_task = tokio::spawn(async move {
         while let Some(chunk) = pty_rx.recv().await {
-            let current_target = viewer_rx.borrow().clone();
+            let current_target = viewer_rx_stream.borrow().clone();
             if let Some(target_id) = current_target {
                 let frame = Frame::Data(chunk).encode();
                 if let Ok(b64_payload) = encrypt_to_base64(&key_clone, &frame) {
                     let relay_msg = SignalingMessage::RelayData {
-                        from_id: host_ident.clone(),
+                        from_id: host_ident_stream.clone(),
                         target_id,
                         payload: b64_payload,
                     };
@@ -162,134 +167,197 @@ pub async fn run_share_session(opts: ShareOptions) -> Result<(), Box<dyn std::er
         }
     });
 
-    // Listen for incoming messages from signaling server
-    while let Some(msg_result) = ws_receiver.next().await {
-        let msg = match msg_result {
-            Ok(m) => m,
-            Err(e) => {
-                warn!("WebSocket read error: {}", e);
-                break;
+    let shutdown_fut = crate::shutdown_signal();
+    tokio::pin!(shutdown_fut);
+
+    // Listen for incoming messages from signaling server or termination signal
+    let exit_reason = loop {
+        tokio::select! {
+            _ = &mut shutdown_fut => {
+                println!();
+                println!("[Shellvyn] Termination signal received (Ctrl+C). Initiating graceful shutdown...");
+                break "Host terminated session (Ctrl+C)";
             }
-        };
+            msg_result = ws_receiver.next() => {
+                let Some(msg_result) = msg_result else {
+                    println!("[Shellvyn] Signaling connection closed by server.");
+                    break "Signaling connection closed by server";
+                };
 
-        match msg {
-            Message::Text(text) => {
-                let parsed: Result<SignalingMessage, _> = serde_json::from_str(&text);
-                match parsed {
-                    Ok(SignalingMessage::PairRequest {
-                        client_id,
-                        remote_ip,
-                        user_agent,
-                    }) => {
-                        println!();
-                        println!("=======================================================");
-                        println!("[Shellvyn] Incoming connection request!");
-                        println!("  Remote IP  : {}", remote_ip);
-                        println!("  User Agent : {}", user_agent);
-                        println!("=======================================================");
-
-                        let approved = if opts.auto_accept {
-                            println!("[Shellvyn] Auto-accept enabled. Connection approved.");
-                            true
-                        } else {
-                            print!("[Shellvyn] Approve connection from {} ({})? [y/N]: ", remote_ip, user_agent);
-                            let _ = std::io::stdout().flush();
-
-                            let (prompt_tx, prompt_rx) = tokio::sync::oneshot::channel();
-                            tokio::task::spawn_blocking(move || {
-                                let mut input = String::new();
-                                if std::io::stdin().read_line(&mut input).is_ok() {
-                                    let trimmed = input.trim().to_lowercase();
-                                    let _ = prompt_tx.send(trimmed == "y" || trimmed == "yes");
-                                } else {
-                                    let _ = prompt_tx.send(false);
-                                }
-                            });
-
-                            match timeout(Duration::from_secs(30), prompt_rx).await {
-                                Ok(Ok(decision)) => decision,
-                                _ => {
-                                    println!("\n[Shellvyn] Approval timed out or declined. Connection rejected.");
-                                    false
-                                }
-                            }
-                        };
-
-                        if approved {
-                            let permission = if opts.read_only {
-                                SessionPermission::ReadOnly
-                            } else {
-                                SessionPermission::Interactive
-                            };
-
-                            let accept_msg = SignalingMessage::PairAccept {
-                                client_id: client_id.clone(),
-                                permission,
-                            };
-                            let _ = tx_to_ws.send(Message::Text(serde_json::to_string(&accept_msg)?.into()));
-                            let _ = viewer_tx.send(Some(client_id));
-
-                            println!("[Shellvyn] Viewer connected. Live terminal streaming active!");
-                        } else {
-                            let reject_msg = SignalingMessage::PairReject {
-                                client_id,
-                                reason: "Host declined connection request".into(),
-                            };
-                            let _ = tx_to_ws.send(Message::Text(serde_json::to_string(&reject_msg)?.into()));
-                        }
+                let msg = match msg_result {
+                    Ok(m) => m,
+                    Err(e) => {
+                        warn!("WebSocket read error: {}", e);
+                        break "WebSocket read error";
                     }
+                };
 
-                    Ok(SignalingMessage::RelayData { payload, .. }) => {
-                        // Decrypt incoming frame from viewer
-                        match decrypt_from_base64(&session_key, &payload) {
-                            Ok(frame_bytes) => {
-                                match Frame::decode(bytes::Bytes::from(frame_bytes)) {
-                                    Ok(Frame::Data(data)) => {
-                                        if !opts.read_only {
-                                            if let Err(e) = pty_session.send_input(data) {
-                                                warn!("Failed to send input to PTY: {}", e);
-                                            }
+                match msg {
+                    Message::Text(text) => {
+                        let parsed: Result<SignalingMessage, _> = serde_json::from_str(&text);
+                        match parsed {
+                            Ok(SignalingMessage::PairRequest {
+                                client_id,
+                                remote_ip,
+                                user_agent,
+                            }) => {
+                                println!();
+                                println!("=======================================================");
+                                println!("[Shellvyn] Incoming connection request!");
+                                println!("  Remote IP  : {}", remote_ip);
+                                println!("  User Agent : {}", user_agent);
+                                println!("=======================================================");
+
+                                let approved = if opts.auto_accept {
+                                    println!("[Shellvyn] Auto-accept enabled. Connection approved.");
+                                    true
+                                } else {
+                                    print!("[Shellvyn] Approve connection from {} ({})? [y/N]: ", remote_ip, user_agent);
+                                    let _ = std::io::stdout().flush();
+
+                                    let (prompt_tx, prompt_rx) = tokio::sync::oneshot::channel();
+                                    tokio::task::spawn_blocking(move || {
+                                        let mut input = String::new();
+                                        if std::io::stdin().read_line(&mut input).is_ok() {
+                                            let trimmed = input.trim().to_lowercase();
+                                            let _ = prompt_tx.send(trimmed == "y" || trimmed == "yes");
+                                        } else {
+                                            let _ = prompt_tx.send(false);
+                                        }
+                                    });
+
+                                    match timeout(Duration::from_secs(30), prompt_rx).await {
+                                        Ok(Ok(decision)) => decision,
+                                        _ => {
+                                            println!("\n[Shellvyn] Approval timed out or declined. Connection rejected.");
+                                            false
                                         }
                                     }
-                                    Ok(Frame::Resize { cols, rows }) => {
-                                        debug!(cols, rows, "Resizing PTY from viewer request");
-                                        let _ = pty_session.resize(Winsize { cols, rows });
-                                    }
-                                    Ok(Frame::Close { reason }) => {
-                                        println!("[Shellvyn] Viewer closed session: {}", reason);
-                                        break;
-                                    }
-                                    _ => {}
+                                };
+
+                                if approved {
+                                    let permission = if opts.read_only {
+                                        SessionPermission::ReadOnly
+                                    } else {
+                                        SessionPermission::Interactive
+                                    };
+
+                                    let accept_msg = SignalingMessage::PairAccept {
+                                        client_id: client_id.clone(),
+                                        permission,
+                                    };
+                                    let _ = tx_to_ws.send(Message::Text(serde_json::to_string(&accept_msg)?.into()));
+                                    let _ = viewer_tx.send(Some(client_id));
+
+                                    println!("[Shellvyn] Viewer connected. Live terminal streaming active!");
+                                } else {
+                                    let reject_msg = SignalingMessage::PairReject {
+                                        client_id,
+                                        reason: "Host declined connection request".into(),
+                                    };
+                                    let _ = tx_to_ws.send(Message::Text(serde_json::to_string(&reject_msg)?.into()));
                                 }
                             }
-                            Err(e) => {
-                                warn!("Failed to decrypt relay payload from viewer: {}", e);
+
+                            Ok(SignalingMessage::RelayData { payload, .. }) => {
+                                // Decrypt incoming frame from viewer
+                                match decrypt_from_base64(&session_key, &payload) {
+                                    Ok(frame_bytes) => {
+                                        match Frame::decode(bytes::Bytes::from(frame_bytes)) {
+                                            Ok(Frame::Data(data)) => {
+                                                if !opts.read_only {
+                                                    if let Ok(session) = pty_session.lock() {
+                                                        if let Err(e) = session.send_input(data) {
+                                                            warn!("Failed to send input to PTY: {}", e);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            Ok(Frame::Resize { cols, rows }) => {
+                                                debug!(cols, rows, "Resizing PTY from viewer request");
+                                                if let Ok(session) = pty_session.lock() {
+                                                    let _ = session.resize(Winsize { cols, rows });
+                                                }
+                                            }
+                                            Ok(Frame::Close { reason }) => {
+                                                println!("[Shellvyn] Viewer closed session: {}", reason);
+                                                break "Viewer closed session";
+                                            }
+                                            _ => {}
+                                        }
+                                    }
+                                    Err(e) => {
+                                        warn!("Failed to decrypt relay payload from viewer: {}", e);
+                                    }
+                                }
                             }
+
+                            Ok(SignalingMessage::Heartbeat { timestamp }) => {
+                                let pong = SignalingMessage::Heartbeat { timestamp };
+                                let _ = tx_to_ws.send(Message::Text(serde_json::to_string(&pong)?.into()));
+                            }
+
+                            Ok(SignalingMessage::Error { code, message }) => {
+                                error!(code = %code, message = %message, "Signaling error received");
+                                if code == "HOST_DISCONNECTED" || code == "SESSION_EXPIRED" {
+                                    break "Session expired or disconnected";
+                                }
+                            }
+
+                            _ => {}
                         }
                     }
-
-                    Ok(SignalingMessage::Heartbeat { timestamp }) => {
-                        let pong = SignalingMessage::Heartbeat { timestamp };
-                        let _ = tx_to_ws.send(Message::Text(serde_json::to_string(&pong)?.into()));
+                    Message::Close(frame) => {
+                        let reason = frame.as_ref().map(|f| f.reason.to_string()).unwrap_or_else(|| "normal".into());
+                        println!("[Shellvyn] Signaling connection closed by server ({reason}).");
+                        break "Signaling connection closed by server";
                     }
-
-                    Ok(SignalingMessage::Error { code, message }) => {
-                        error!(code = %code, message = %message, "Signaling error received");
-                    }
-
                     _ => {}
                 }
             }
-            Message::Close(_) => {
-                println!("[Shellvyn] Signaling connection closed.");
-                break;
+        }
+    };
+
+    // 1. Notify active viewer if present
+    if let Some(target_id) = viewer_rx.borrow().clone() {
+        println!("[Shellvyn] Notifying active viewer of disconnect...");
+        let close_frame = Frame::Close {
+            reason: exit_reason.into(),
+        }
+        .encode();
+        if let Ok(b64_payload) = encrypt_to_base64(&session_key, &close_frame) {
+            let relay_msg = SignalingMessage::RelayData {
+                from_id: host_ident.clone(),
+                target_id,
+                payload: b64_payload,
+            };
+            if let Ok(json) = serde_json::to_string(&relay_msg) {
+                let _ = tx_to_ws.send(Message::Text(json.into()));
             }
-            _ => {}
         }
     }
 
+    // 2. Send clean WebSocket close frame to signaling server
+    println!("[Shellvyn] Closing signaling server connection...");
+    let close_msg = Message::Close(Some(CloseFrame {
+        code: CloseCode::Normal,
+        reason: exit_reason.into(),
+    }));
+    let _ = tx_to_ws.send(close_msg);
+
+    // Yield briefly to ensure the WebSocket close frame flushes over TCP
+    tokio::time::sleep(Duration::from_millis(150)).await;
+
+    // 3. Stop background tasks
     pty_stream_task.abort();
     ws_send_task.abort();
-    println!("[Shellvyn] Session terminated.");
+
+    // 4. Terminate child terminal process
+    println!("[Shellvyn] Terminating terminal process...");
+    if let Ok(mut session) = pty_session.lock() {
+        let _ = session.terminate();
+    }
+
+    println!("[Shellvyn] Host session closed cleanly. Goodbye!");
     Ok(())
 }
